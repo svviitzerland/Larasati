@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { gallery } from '$lib/data';
+	import { crafts, gallery, type Craft } from '$lib/data';
 	import { onFrame, onResize } from '$lib/scroll.svelte';
 	import { openViewer } from '$lib/viewer.svelte';
 
@@ -26,12 +26,15 @@
 	let lightY = $state(35);
 
 	const clamp = (v: number, a: number, b: number) => Math.min(Math.max(v, a), b);
-	const ratio = { portrait: '3 / 4', landscape: '4 / 3', square: '1 / 1' };
-	// Lebar bingkai dihitung sendiri dari angka perbandingan ini. Menyerahkan
-	// perhitungannya pada `aspect-ratio` membuat Safari melebarkan bingkai
-	// jauh melebihi gambarnya.
-	const ratioOf = { portrait: 0.75, landscape: 1.3333, square: 1 };
 	const hang = ['0rem', '2.5rem', '1rem', '3.25rem'];
+
+	// nama pendek untuk lencana di sudut sampul, ruangnya sempit
+	const short: Record<Craft, string> = {
+		'Master of Ceremony': 'MC',
+		'Voice Over': 'VO',
+		Model: 'Model'
+	};
+	const badge = (roles: Craft[]) => roles.map((role) => short[role]).join(' · ');
 
 	async function measure() {
 		if (!section || !rail || !stage) return;
@@ -110,7 +113,7 @@
 	style:--lead={pinned ? `${lead}px` : undefined}
 	style:--tail={pinned ? `${tail}px` : undefined}
 	onpointermove={trackLight}
-	aria-label="Galeri dokumentasi acara"
+	aria-label="Galeri reel Instagram"
 >
 	<!-- gerbang lengkung, senada dengan bingkai potret di beranda.
 	     Terang di luar, gelap di dalam, tanpa garis batas mendatar. -->
@@ -136,14 +139,19 @@
 			<div class="intro">
 				<p class="eyebrow label-caps">Galeri</p>
 				<h2 class="font-display">
-					Dokumentasi<br /><span class="gold">Acara</span>
+					Panggung,<br /><span class="gold">Suara, Layar</span>
 				</h2>
 				<p class="say">
-					Kumpulan foto dari acara yang saya bawakan, mulai dari seminar kampus sampai panggung
-					dengan ribuan penonton. Pilih satu foto untuk membaca detail acaranya.
+					Tiga peran yang saya kerjakan, membawakan acara, mengisi suara, dan berdiri di depan
+					kamera. Yang tersimpan di sini baru sebagiannya dan daftarnya masih terus bertambah.
 				</p>
+				<ul class="crafts">
+					{#each crafts as craft (craft)}
+						<li class="label-caps">{craft}</li>
+					{/each}
+				</ul>
 				<p class="hint label-caps">
-					{pinned ? 'Gulir untuk melihat foto berikutnya' : 'Ketuk foto untuk melihat detail'}
+					{pinned ? 'Gulir untuk melihat karya berikutnya' : 'Ketuk sampul untuk memutar karya'}
 				</p>
 			</div>
 
@@ -154,20 +162,24 @@
 					class:near={i === active}
 					style:--hang={hang[i % hang.length]}
 					onclick={() => openViewer(i)}
-					data-cursor="Lihat"
-					aria-label="Buka karya {item.no}, {item.title}"
+					data-cursor="Putar"
+					aria-label="Putar karya {item.no}, {item.title} bersama {item.brand}, sebagai {item.roles.join(
+						' dan '
+					)}"
 				>
 					<span class="lamp" aria-hidden="true"></span>
 					<span class="cone" aria-hidden="true"></span>
 
 					<span class="frame">
 						<span class="mat">
-							<span
-								class="crop"
-								style:aspect-ratio={ratio[item.shape]}
-								style:--ar={ratioOf[item.shape]}
-							>
-								<img src={item.src} alt="{item.title} pada {item.event}" loading="lazy" />
+							<span class="crop">
+								<img
+									src={item.cover}
+									alt="Sampul reel {item.title} bersama {item.brand}"
+									loading="lazy"
+								/>
+								<span class="tag label-caps" aria-hidden="true">{badge(item.roles)}</span>
+								<span class="play" aria-hidden="true"></span>
 							</span>
 						</span>
 						<span class="glass" aria-hidden="true"></span>
@@ -176,17 +188,17 @@
 					<span class="pool" aria-hidden="true"></span>
 
 					<span class="plaque">
-						<span class="no label-caps">{item.no} · {item.year}</span>
+						<span class="no label-caps">{item.no} · {item.date}</span>
 						<span class="title font-display">{item.title}</span>
-						<span class="meta">{item.role} · {item.event}</span>
-						<span class="place">{item.venue} · {item.audience}</span>
+						<span class="meta">{item.brand}</span>
+						<span class="place">{item.account} · {item.topic}</span>
 					</span>
 				</button>
 			{/each}
 
 			<div class="outro">
 				<p class="font-display">Daftar ini terus bertambah</p>
-				<p class="say">Terbuka untuk acara berikutnya.</p>
+				<p class="say">Terbuka untuk kerja sama berikutnya.</p>
 			</div>
 		</div>
 
@@ -200,6 +212,8 @@
 
 <style>
 	.hall {
+		/* tinggi sampul di dalam lorong, dipakai ulang untuk menghitung lebar */
+		--reel: min(50svh, 33rem);
 		position: relative;
 		overflow: hidden;
 		background: var(--color-noir);
@@ -372,8 +386,21 @@
 		line-height: 1.95;
 		color: color-mix(in srgb, var(--color-ivory) 58%, transparent);
 	}
+	.crafts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 1.8rem;
+	}
+	.crafts li {
+		padding: 0.5rem 0.8rem;
+		color: color-mix(in srgb, var(--color-ivory) 62%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-gold) 30%, transparent);
+		border-radius: 999px;
+	}
+
 	.hint {
-		margin-top: 2.2rem;
+		margin-top: 1.8rem;
 		color: color-mix(in srgb, var(--color-gold) 75%, transparent);
 	}
 	.outro .font-display {
@@ -385,6 +412,8 @@
 	.piece {
 		position: relative;
 		display: block;
+		width: 100%;
+		max-width: 20rem;
 		text-align: left;
 		transition: transform 0.9s var(--ease-silk);
 	}
@@ -392,18 +421,21 @@
 	   punya lebar berbeda persis seperti dinding pameran sungguhan */
 	.pinned .piece {
 		width: auto;
+		max-width: none;
 		flex-shrink: 0;
 		transform: translateY(var(--hang));
 	}
+	/* tinggi sampul ditentukan layar supaya satu bingkai utuh selalu muat
+	   dalam sekali tampilan, lebarnya mengikuti perbandingan reel 9 : 16.
+	   Lebar dihitung tegas, bukan diserahkan pada aspect-ratio, supaya
+	   Safari tidak melebarkan bingkai melebihi gambarnya. */
 	.pinned .crop {
 		display: block;
-		height: 40svh;
-		/* lebarnya dihitung tegas, bukan diserahkan pada aspect-ratio,
-		   supaya sama persis di semua peramban */
-		width: calc(40svh * var(--ar, 1));
+		height: var(--reel);
+		width: calc(var(--reel) * 0.5625);
 	}
 	.pinned .plaque {
-		max-width: 21rem;
+		max-width: 18rem;
 	}
 
 	.lamp {
@@ -461,8 +493,10 @@
 		box-shadow: inset 0 0 22px rgba(90, 70, 50, 0.22);
 	}
 	.crop {
+		position: relative;
 		display: block;
 		width: 100%;
+		aspect-ratio: 9 / 16;
 		overflow: hidden;
 	}
 	.crop img {
@@ -476,6 +510,42 @@
 			filter 1s var(--ease-silk),
 			transform 1.5s var(--ease-silk);
 	}
+	/* penanda bahwa yang dibingkai adalah unggahan, bukan sekadar foto */
+	.tag {
+		position: absolute;
+		top: 0.6rem;
+		left: 0.6rem;
+		padding: 0.32rem 0.5rem 0.3rem;
+		font-size: 0.5rem;
+		letter-spacing: 0.22em;
+		color: rgba(255, 255, 255, 0.9);
+		background: rgba(18, 14, 12, 0.42);
+		border: 1px solid rgba(255, 255, 255, 0.24);
+	}
+	.play {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		display: grid;
+		place-items: center;
+		width: 3.2rem;
+		height: 3.2rem;
+		margin: -1.6rem 0 0 -1.6rem;
+		border-radius: 999px;
+		border: 1px solid rgba(255, 255, 255, 0.62);
+		background: rgba(18, 14, 12, 0.34);
+		transition:
+			background-color 0.7s var(--ease-silk),
+			border-color 0.7s var(--ease-silk),
+			transform 0.7s var(--ease-silk);
+	}
+	.play::after {
+		content: '';
+		margin-left: 3px;
+		border-left: 11px solid rgba(255, 255, 255, 0.94);
+		border-block: 7px solid transparent;
+	}
+
 	.glass {
 		position: absolute;
 		inset: 0.6rem;
@@ -542,6 +612,13 @@
 	.piece.near .crop img {
 		filter: saturate(1.04) brightness(1.02);
 		transform: scale(1.06);
+	}
+	.piece:hover .play,
+	.piece:focus-visible .play,
+	.piece.near .play {
+		border-color: var(--color-gold);
+		background: rgba(18, 14, 12, 0.55);
+		transform: scale(1.08);
 	}
 	.piece:hover .frame,
 	.piece:focus-visible .frame {

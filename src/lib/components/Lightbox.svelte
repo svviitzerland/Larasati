@@ -7,6 +7,27 @@
 
 	const item = $derived(gallery[viewer.index]);
 
+	let frame = $state<HTMLIFrameElement | null>(null);
+
+	/**
+	 * Halaman sematan Instagram mengabarkan tinggi aslinya lewat postMessage,
+	 * cara yang sama dipakai skrip resmi mereka. Hasil ukurannya disimpan per
+	 * reel supaya bingkai tidak melompat ketika unggahan itu dibuka lagi.
+	 */
+	let heights = $state<Record<string, number>>({});
+	const frameHeight = $derived(heights[item.code] ?? 0);
+
+	function onMessage(event: MessageEvent) {
+		if (!frame || event.source !== frame.contentWindow) return;
+		try {
+			const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+			const measured = Number(data?.details?.height);
+			if (data?.type === 'MEASURE' && measured > 0) heights[item.code] = Math.round(measured);
+		} catch {
+			// pesan dari sumber lain, bukan urusan kita
+		}
+	}
+
 	function next() {
 		viewer.index = (viewer.index + 1) % gallery.length;
 	}
@@ -28,10 +49,10 @@
 	});
 </script>
 
-<svelte:window on:keydown={onKey} />
+<svelte:window on:keydown={onKey} on:message={onMessage} />
 
 {#if viewer.open}
-	<div class="viewer" role="dialog" aria-modal="true" aria-label="Tampilan karya">
+	<div class="viewer" role="dialog" aria-modal="true" aria-label="Pemutar reel Instagram">
 		<button
 			class="backdrop"
 			transition:fade={{ duration: 400 }}
@@ -44,22 +65,40 @@
 		<div class="body">
 			{#key item.id}
 				<div class="art" in:scale={{ duration: 750, start: 0.94, opacity: 0, easing: cubicOut }}>
-					<img src={item.src} alt="{item.title} pada {item.event}" />
+					<iframe
+						bind:this={frame}
+						class="reel"
+						title="Reel Instagram {item.title}"
+						src="https://www.instagram.com/reel/{item.code}/embed/"
+						style:height={frameHeight ? `${frameHeight}px` : null}
+						allow="encrypted-media; picture-in-picture; clipboard-write"
+						allowfullscreen
+						referrerpolicy="origin-when-cross-origin"
+					></iframe>
 				</div>
 
 				<div class="note" in:fly={{ y: 26, duration: 750, delay: 120, easing: cubicOut }}>
-					<p class="gold label-caps">Karya {item.no} · {item.year}</p>
+					<p class="gold label-caps">Karya {item.no} · {item.date}</p>
 					<h3 class="font-display">{item.title}</h3>
 					<p class="say">{item.note}</p>
 
 					<dl>
-						{#each [['Acara', item.event], ['Peran', item.role], ['Lokasi', item.venue], ['Skala', item.audience]] as [key, value] (key)}
+						{#each [['Peran', item.roles.join(', ')], ['Klien', item.brand], ['Topik', item.topic], ['Akun', item.account], ['Tayang', item.date]] as [key, value] (key)}
 							<div>
 								<dt class="label-caps">{key}</dt>
 								<dd class="font-display">{value}</dd>
 							</div>
 						{/each}
 					</dl>
+
+					<a
+						class="out label-caps"
+						href="https://www.instagram.com/reel/{item.code}/"
+						target="_blank"
+						rel="noreferrer noopener"
+					>
+						Buka di Instagram
+					</a>
 				</div>
 			{/key}
 		</div>
@@ -67,10 +106,8 @@
 		<button class="ctrl close" onclick={closeViewer} transition:fade aria-label="Tutup">
 			<span></span><span></span>
 		</button>
-		<button class="ctrl left" onclick={prev} transition:fade aria-label="Karya sebelumnya">‹</button
-		>
-		<button class="ctrl right" onclick={next} transition:fade aria-label="Karya berikutnya"
-			>›</button
+		<button class="ctrl left" onclick={prev} transition:fade aria-label="Reel sebelumnya">‹</button>
+		<button class="ctrl right" onclick={next} transition:fade aria-label="Reel berikutnya">›</button
 		>
 
 		<p class="tally label-caps" transition:fade>{viewer.index + 1} dari {gallery.length}</p>
@@ -78,22 +115,23 @@
 {/if}
 
 <style>
+	/* lebar pemutar, sengaja di atas lebar minimum sematan Instagram */
 	.viewer {
+		--reel-w: 21rem;
 		position: fixed;
 		inset: 0;
 		z-index: 150;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 	.backdrop {
-		position: absolute;
+		position: fixed;
 		inset: 0;
 		background: color-mix(in srgb, var(--color-noir) 94%, transparent);
 		backdrop-filter: blur(14px);
 	}
 	.beam {
-		position: absolute;
+		position: fixed;
 		top: 0;
 		left: 50%;
 		width: 70vw;
@@ -106,22 +144,29 @@
 		pointer-events: none;
 	}
 
+	/* isi dipusatkan selama masih muat, dan baru boleh digulir kalau tidak */
 	.body {
 		position: relative;
 		z-index: 2;
 		display: grid;
+		align-content: center;
 		align-items: center;
 		gap: 2.5rem;
+		min-height: 100%;
 		width: 100%;
 		max-width: 72rem;
-		padding-inline: 1.5rem;
+		margin-inline: auto;
+		padding: 5.5rem 1.1rem 5.5rem;
 		color: var(--color-ivory);
 	}
 	@media (min-width: 900px) {
+		.viewer {
+			--reel-w: 23rem;
+		}
 		.body {
 			grid-template-columns: 1.15fr 0.85fr;
 			gap: 4rem;
-			padding-inline: 3rem;
+			padding: 4rem 3rem;
 		}
 	}
 
@@ -129,18 +174,16 @@
 		display: flex;
 		justify-content: center;
 	}
-	.art img {
-		max-height: 52svh;
-		width: auto;
-		max-width: 100%;
-		border: 10px solid #efe6da;
-		object-fit: contain;
+	.reel {
+		width: 100%;
+		max-width: var(--reel-w);
+		/* Tinggi cadangan sebelum sematan mengabarkan ukuran aslinya.
+		   Instagram memasang videonya dalam kotak 4 : 5 lalu menambah
+		   kepala dan kaki setinggi tiga belas rem. */
+		height: calc(var(--reel-w) * 1.25 + 13rem);
+		border: 0;
+		background: #fff;
 		box-shadow: 0 60px 120px -40px rgba(0, 0, 0, 0.9);
-	}
-	@media (min-width: 900px) {
-		.art img {
-			max-height: 74svh;
-		}
 	}
 
 	.gold {
@@ -180,8 +223,20 @@
 		color: color-mix(in srgb, var(--color-ivory) 92%, transparent);
 	}
 
+	.out {
+		display: inline-block;
+		margin-top: 1.8rem;
+		padding-bottom: 0.4rem;
+		color: var(--color-gold);
+		border-bottom: 1px solid color-mix(in srgb, var(--color-gold) 45%, transparent);
+		transition: border-color 0.5s var(--ease-silk);
+	}
+	.out:hover {
+		border-color: var(--color-gold);
+	}
+
 	.ctrl {
-		position: absolute;
+		position: fixed;
 		z-index: 3;
 		display: grid;
 		place-items: center;
@@ -189,6 +244,7 @@
 		height: 3rem;
 		border-radius: 999px;
 		border: 1px solid color-mix(in srgb, var(--color-ivory) 20%, transparent);
+		background: color-mix(in srgb, var(--color-noir) 70%, transparent);
 		color: var(--color-ivory);
 		font-family: var(--font-display);
 		font-size: 1.6rem;
@@ -225,30 +281,59 @@
 	.close span:last-child {
 		transform: rotate(-45deg);
 	}
+
+	/* di layar sempit tombol pindah turun ke bawah supaya tidak menutupi
+	   pemutar yang sudah memakai hampir seluruh lebar layar */
 	.left {
 		left: 1rem;
-		top: 50%;
-		margin-top: -1.5rem;
+		bottom: 1.1rem;
 	}
 	.right {
 		right: 1rem;
-		top: 50%;
-		margin-top: -1.5rem;
+		bottom: 1.1rem;
 	}
-	@media (min-width: 768px) {
+	@media (min-width: 900px) {
 		.left {
 			left: 2rem;
+			top: 50%;
+			bottom: auto;
+			margin-top: -1.5rem;
 		}
 		.right {
 			right: 2rem;
+			top: 50%;
+			bottom: auto;
+			margin-top: -1.5rem;
+		}
+	}
+
+	/* di layar sempit isi digulir melewati tombol, jadi dasarnya diredupkan */
+	.viewer::after {
+		content: '';
+		position: fixed;
+		z-index: 2;
+		inset-inline: 0;
+		bottom: 0;
+		height: 7rem;
+		background: linear-gradient(to top, var(--color-noir), transparent);
+		pointer-events: none;
+	}
+	@media (min-width: 900px) {
+		.viewer::after {
+			content: none;
 		}
 	}
 
 	.tally {
-		position: absolute;
-		bottom: 1.6rem;
+		position: fixed;
+		bottom: 2.2rem;
 		left: 50%;
 		transform: translateX(-50%);
 		color: color-mix(in srgb, var(--color-ivory) 42%, transparent);
+	}
+	@media (min-width: 900px) {
+		.tally {
+			bottom: 1.6rem;
+		}
 	}
 </style>

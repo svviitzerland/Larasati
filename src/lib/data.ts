@@ -5,8 +5,8 @@
  * diambil apa adanya dari sana, bukan karangan, supaya tetap bisa
  * dipertanggungjawabkan kalau ada yang bertanya.
  *
- * Foto galeri disimpan di `static/gallery/` lalu ditulis sebagai
- * `/gallery/nama-berkas.jpg` pada properti `src`.
+ * Sampul galeri disimpan di `static/gallery/` lalu ditulis sebagai
+ * `/gallery/nama-berkas.webp` pada properti `cover`.
  */
 
 export const profile = {
@@ -40,6 +40,8 @@ export const stats = [
 
 export const tickerWords = [
 	'Master of Ceremony',
+	'Voice Over',
+	'Model',
 	'Asisten Dosen',
 	'Algoritma Pemrograman',
 	'Java',
@@ -72,11 +74,11 @@ export const facets = [
 		text: 'Membawakan acara resmi himpunan, memimpin program pengabdian di desa, dan mengurus kaderisasi ratusan mahasiswa baru. Semuanya berawal dari satu kebiasaan, berani memegang mikrofon.',
 		skills: [
 			'Master of Ceremony',
+			'Voice Over',
+			'Model',
 			'Public Speaking',
 			'Hubungan Masyarakat',
-			'Manajemen Acara',
-			'Kaderisasi',
-			'Liaison Officer'
+			'Manajemen Acara'
 		]
 	}
 ];
@@ -109,138 +111,172 @@ export const paperLines = [
 	'Acara berjalan sesuai rencana karena setiap kemungkinan sudah disiapkan.'
 ];
 
-/**
- * Kalimat yang memuat nama Laras. Salah satunya dipilih untuk baris tengah,
- * lalu barisnya digeser sampai nama itu jatuh tepat di titik tengah layar.
- *
- * Syaratnya satu, tiap kalimat harus memuat kata Laras persis sekali.
- */
-export const paperNameLines = [
-	'Empat puluh mahasiswa tiap semester belajar algoritma bersama Laras di kelas responsi.',
-	'Himpunan menyerahkan mikrofon kepada Laras ketika acara resmi harus dibuka.',
-	'Program Bina Desa dengan seratus lima puluh peserta dipimpin oleh Laras sebagai ketua.',
-	'Dua ratus mahasiswa baru dikawal Laras melewati rangkaian kaderisasi PROXIMITI.',
-	'Di daftar asisten dosen Algoritma Pemrograman, nama Laras sudah tercatat sejak 2025.'
+/** Kalimat pendek berhuruf judul, dipakai untuk baris tajuk. */
+export const paperHeads = [
+	'Rundown Berubah di Menit Terakhir',
+	'Empat Puluh Mahasiswa Menunggu Responsi',
+	'Mikrofon Dinyalakan, Ruangan Menyimak',
+	'Bina Desa Menutup Pekan dengan Sorak',
+	'Dua Ratus Nama Baru Masuk Daftar Hadir',
+	'Logika Dibedah Sampai Semua Paham',
+	'Kesan Pertama Dibangun Tiga Puluh Detik',
+	'Panggung Kecil di Ujung Ruang Kuliah',
+	'Suara yang Sampai ke Baris Paling Belakang',
+	'Persiapan Rapi Menyelamatkan Satu Acara'
 ];
+
+/** Lema untuk halaman indeks, disusul titik titik dan nomor halaman. */
+export const paperEntries = [
+	'Algoritma Pemrograman',
+	'Bina Desa, Pasir Endah',
+	'Kaderisasi PROXIMITI',
+	'Forum Genre Bali',
+	'Hubungan Masyarakat',
+	'Informatics Laboratory',
+	'Master of Ceremony',
+	'Sistem Tertanam',
+	'Voice Over',
+	'Desain Grafis',
+	'PKKMB Megabit',
+	'Ketua OSIS'
+];
+
+/** Bentuk cetakan tempat namanya bisa muncul. */
+export type PaperKind = 'berita' | 'judul' | 'indeks' | 'takarir';
+
+/**
+ * Kalimat yang memuat nama Laras, dikelompokkan menurut bentuk cetakannya.
+ * Halaman boleh berganti rupa sesuka hati, dari berita ke indeks ke takarir,
+ * tetapi namanya selalu jatuh di titik tengah layar.
+ *
+ * Syaratnya satu, tiap kalimat harus memuat kata Laras persis sekali dan
+ * berdiri sendiri, sebab kata itulah yang ditukar dengan nama lengkapnya.
+ */
+export const paperNameLines: Record<PaperKind, string[]> = {
+	berita: [
+		'Empat puluh mahasiswa tiap semester belajar algoritma bersama Laras di kelas responsi.',
+		'Himpunan menyerahkan mikrofon kepada Laras ketika acara resmi harus dibuka.',
+		'Program Bina Desa dengan seratus lima puluh peserta dipimpin oleh Laras sebagai ketua.',
+		'Dua ratus mahasiswa baru dikawal Laras melewati rangkaian kaderisasi PROXIMITI.',
+		'Di daftar asisten dosen Algoritma Pemrograman, nama Laras sudah tercatat sejak 2025.'
+	],
+	judul: [
+		'Mikrofon Diserahkan kepada Laras Ketika Acara Dibuka',
+		'Laras Memimpin Bina Desa di Pasir Endah',
+		'Dua Ratus Mahasiswa Baru Dikawal Laras',
+		'Laras Tercatat sebagai Asisten Dosen Sejak 2025'
+	],
+	indeks: [
+		'Laras · pembawa acara · hal. 214',
+		'Laras · asisten dosen · hal. 87',
+		'Laras · pengisi suara · hal. 132',
+		'Laras · hubungan masyarakat · hal. 45'
+	],
+	takarir: [
+		'Foto: Laras memimpin Bina Desa di Pasir Endah, 2025',
+		'Dokumentasi: Laras membawakan acara resmi himpunan',
+		'Arsip 2026 · HMTI · Laras, Divisi Hubungan Masyarakat',
+		'Takarir: Laras di ruang praktikum Informatics Laboratory'
+	]
+};
+
+/** Tiga peran yang dikerjakan di depan panggung, mikrofon, dan kamera. */
+export type Craft = 'Master of Ceremony' | 'Voice Over' | 'Model';
+
+/** urutannya dipakai sebagai keterangan singkat di bawah judul galeri */
+export const crafts: Craft[] = ['Master of Ceremony', 'Voice Over', 'Model'];
 
 export type GalleryItem = {
 	id: string;
 	no: string;
+	/** kode pendek reel di Instagram, dipakai untuk pemutar sematan */
+	code: string;
 	title: string;
-	event: string;
-	role: string;
-	venue: string;
-	year: string;
-	audience: string;
+	roles: Craft[];
+	brand: string;
+	account: string;
+	/** tanggal tayang, ditulis apa adanya untuk pelat nama */
+	date: string;
+	topic: string;
 	note: string;
-	src: string;
-	shape: 'portrait' | 'landscape' | 'square';
+	cover: string;
 };
 
+/**
+ * Karya yang sudah tayang, satu blok untuk satu unggahan. Sampulnya diunduh
+ * dari unggahan aslinya dan disimpan di `static/gallery/`, sedangkan videonya
+ * diputar lewat sematan resmi Instagram saat dibuka.
+ *
+ * Untuk menambah satu karya, salin satu blok di bawah lalu ganti `code`
+ * dengan kode di tautan reel (bagian setelah `/reel/`), simpan sampulnya
+ * sebagai `static/gallery/reel-xx.webp`, dan tulis ulang keterangannya.
+ * Isi `roles` boleh lebih dari satu kalau satu karya menuntut dua peran.
+ */
 export const gallery: GalleryItem[] = [
 	{
-		id: 'g1',
+		id: 'r1',
 		no: 'I',
-		title: 'Merajut Asa Teknologi',
-		event: 'Bina Desa, HMTI Telkom University',
-		role: 'Ketua Pelaksana',
-		venue: 'Kelurahan Pasir Endah, Bandung',
-		year: '2025',
-		audience: '150 peserta',
-		note: 'Memimpin program pengabdian yang membawa pengenalan teknologi langsung ke warga desa, dari penyusunan konsep sampai hari pelaksanaan.',
-		src: '/gallery/01.svg',
-		shape: 'portrait'
+		code: 'Dbfl901PIbp',
+		title: 'Destinasi Cantik Baru di Bandung',
+		roles: ['Model', 'Voice Over'],
+		brand: 'Melinda Aesthetic Center',
+		account: '@infobdgcom',
+		date: '1 Agustus 2026',
+		topic: 'Kecantikan dan perawatan kulit',
+		note: 'Menyusuri klinik kecantikan yang baru dibuka di Bandung, dari ruang konsultasi sampai teknologi perawatan yang ditawarkan.',
+		cover: '/gallery/reel-01.webp'
 	},
 	{
-		id: 'g2',
+		id: 'r2',
 		no: 'II',
-		title: 'Kaderisasi Dua Ratus Wajah Baru',
-		event: 'PROXIMITI 2025',
-		role: 'Sekretaris I',
-		venue: 'Telkom University',
-		year: '2025',
-		audience: '200 mahasiswa',
-		note: 'Menyusun administrasi dan alur kaderisasi untuk mahasiswa angkatan 2024, sekaligus menjaga rangkaian acaranya tetap berjalan sesuai rencana.',
-		src: '/gallery/02.svg',
-		shape: 'landscape'
+		code: 'DbnMTkfzvMC',
+		title: 'Bandung ke Denpasar Terbang Langsung',
+		roles: ['Voice Over'],
+		brand: 'Garuda Indonesia',
+		account: '@infobdgcom',
+		date: '4 Agustus 2026',
+		topic: 'Penerbangan dan perjalanan',
+		note: 'Mengisi narasi kabar rute langsung Bandung menuju Denpasar lewat Bandara Husein Sastranegara, lengkap dengan gambaran layanan di dalam pesawat.',
+		cover: '/gallery/reel-02.webp'
 	},
 	{
-		id: 'g3',
+		id: 'r3',
 		no: 'III',
-		title: 'Di Depan Mikrofon Himpunan',
-		event: 'Acara Resmi HMTI Telkom University',
-		role: 'Master of Ceremony',
-		venue: 'Telkom University',
-		year: '2025',
-		audience: '5 acara resmi',
-		note: 'Membawakan acara resmi himpunan sekaligus mewakili organisasi, dari pembukaan program sampai sesi penutupan.',
-		src: '/gallery/03.svg',
-		shape: 'portrait'
+		code: 'Db41xWjPf8K',
+		title: 'Eiger Women Flagship Store Buka di Bandung',
+		roles: ['Voice Over'],
+		brand: 'Eiger',
+		account: '@infobdgcom',
+		date: '11 Agustus 2026',
+		topic: 'Peritel dan gaya hidup luar ruang',
+		note: 'Meliput pembukaan gerai utama Eiger Women di Jalan Sumatra, berkeliling dari rak perlengkapan sampai layanan garansi seumur hidup.',
+		cover: '/gallery/reel-03.webp'
 	},
 	{
-		id: 'g4',
+		id: 'r4',
 		no: 'IV',
-		title: 'Kelas Responsi Sore Hari',
-		event: 'Asisten Dosen Algoritma Pemrograman',
-		role: 'Asisten Dosen',
-		venue: 'Universitas Telkom',
-		year: '2025',
-		audience: '40+ mahasiswa',
-		note: 'Menemani mahasiswa memahami logika pemrograman lewat sesi responsi tambahan, lalu memeriksa tugas dan hasil praktikum mereka.',
-		src: '/gallery/04.svg',
-		shape: 'square'
+		code: 'DcLjH4APliX',
+		title: 'Medikacom Carnaval, Kreativitas Tanpa Batas',
+		roles: ['Voice Over'],
+		brand: 'SMK Medikacom',
+		account: '@infobdgcom',
+		date: '18 Agustus 2026',
+		topic: 'Pendidikan dan acara sekolah',
+		note: 'Mengisi narasi liputan karnaval sekolah, dari busana daerah dan kendaraan hias sampai kekompakan peserta di sepanjang jalan.',
+		cover: '/gallery/reel-04.webp'
 	},
 	{
-		id: 'g5',
+		id: 'r5',
 		no: 'V',
-		title: 'Menelusuri Kesalahan Kode',
-		event: 'Praktikum Algoritma Pemrograman',
-		role: 'Asisten Praktikum',
-		venue: 'Informatics Laboratory',
-		year: '2024',
-		audience: '14 modul jurnal',
-		note: 'Mendampingi lebih dari empat puluh mahasiswa menyelesaikan modul terbimbing dan membantu mencari sumber kesalahan di setiap sesi.',
-		src: '/gallery/05.svg',
-		shape: 'landscape'
-	},
-	{
-		id: 'g6',
-		no: 'VI',
-		title: 'Penyambut Mahasiswa Baru',
-		event: 'PKKMB X Megabit 7.0',
-		role: 'Liaison Officer',
-		venue: 'Telkom University',
-		year: '2024',
-		audience: 'Mahasiswa baru',
-		note: 'Menjadi penghubung antara panitia dan peserta selama rangkaian pengenalan kampus berlangsung.',
-		src: '/gallery/06.svg',
-		shape: 'portrait'
-	},
-	{
-		id: 'g7',
-		no: 'VII',
-		title: 'Belajar Membangun Halaman',
-		event: 'GDSC Mini Bootcamp Website Development',
-		role: 'Peserta',
-		venue: 'GDSC Telkom University',
-		year: '2024',
-		audience: 'Pelatihan intensif',
-		note: 'Mendalami dasar pengembangan web, praktik merancang antarmuka, dan penerapan teknologi frontend masa kini.',
-		src: '/gallery/07.svg',
-		shape: 'square'
-	},
-	{
-		id: 'g8',
-		no: 'VIII',
-		title: 'Suara dari Bali',
-		event: 'Forum Genre Provinsi Bali',
-		role: 'Divisi Komunikasi dan Informasi',
-		venue: 'Bali',
-		year: '2021',
-		audience: '2 tahun',
-		note: 'Menyusun dan menyampaikan pesan edukasi untuk remaja, kebiasaan awal yang kemudian terbawa sampai ke panggung kampus.',
-		src: '/gallery/08.svg',
-		shape: 'landscape'
+		code: 'DcxjYBwPr1f',
+		title: 'Road to Ionation 7th, Workout dan Wellness',
+		roles: ['Voice Over'],
+		brand: 'Ion Water by Pocari Sweat',
+		account: '@infobdgcom',
+		date: '2 September 2026',
+		topic: 'Olahraga dan kebugaran',
+		note: 'Mengisi narasi sesi olahraga bersama di Setiabudhi Social Club Bandung, rangkaian menuju festival kebugaran Ionation ketujuh.',
+		cover: '/gallery/reel-05.webp'
 	}
 ];
 

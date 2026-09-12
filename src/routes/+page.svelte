@@ -14,7 +14,7 @@
 	import Lightbox from '$lib/components/Lightbox.svelte';
 	import Seam from '$lib/components/Seam.svelte';
 
-	const description = `Portofolio ${profile.name}, ${profile.role}. Galeri dokumentasi acara, pengalaman, dan kontak kerja sama.`;
+	const description = `Portofolio ${profile.name}, ${profile.role}. Galeri karya sebagai pembawa acara, pengisi suara, dan model, pengalaman, dan kontak kerja sama.`;
 
 	// satu pemantau untuk navigasi dan penanda gulir
 	$effect(() => watchSections('galeri'));
