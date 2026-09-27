@@ -203,58 +203,47 @@ export type GalleryItem = {
 };
 
 /**
- * Karya yang sudah tayang, satu blok untuk satu unggahan. Sampulnya diunduh
- * dari unggahan aslinya dan disimpan di `static/gallery/`, sedangkan videonya
+ * Karya yang sudah tayang, satu blok untuk satu unggahan, diurutkan dari
+ * yang paling baru tayang. Nomor romawinya mengikuti urutan tampil ini.
+ * Sampulnya diunduh dari unggahan aslinya dan disimpan di `static/gallery/`, sedangkan videonya
  * diputar lewat sematan resmi Instagram saat dibuka.
  *
- * Untuk menambah satu karya, salin satu blok di bawah lalu ganti `code`
+ * Untuk menambah satu karya, salin satu blok ke paling atas lalu ganti `code`
  * dengan kode di tautan reel (bagian setelah `/reel/`), simpan sampulnya
  * sebagai `static/gallery/reel-xx.webp`, dan tulis ulang keterangannya.
  * Isi `roles` boleh lebih dari satu kalau satu karya menuntut dua peran.
+ * Jangan lupa menggeser nomor romawi karya lainnya.
  */
 export const gallery: GalleryItem[] = [
 	{
-		id: 'r1',
+		id: 'r6',
 		no: 'I',
-		code: 'Dbfl901PIbp',
-		title: 'Destinasi Cantik Baru di Bandung',
-		roles: ['Model', 'Voice Over'],
-		brand: 'Melinda Aesthetic Center',
+		code: 'DdOgwIVz71Z',
+		title: 'Makanan Viral Bandung dan Diskon Puas GrabFood',
+		roles: ['Voice Over'],
+		brand: 'GrabFood',
 		account: '@infobdgcom',
-		date: '1 Agustus 2026',
-		topic: 'Kecantikan dan perawatan kulit',
-		note: 'Menyusuri klinik kecantikan yang baru dibuka di Bandung, dari ruang konsultasi sampai teknologi perawatan yang ditawarkan.',
-		cover: '/gallery/reel-01.webp'
+		date: '13 September 2026',
+		topic: 'Kuliner dan layanan pesan antar',
+		note: 'Mengisi narasi soal makanan viral Bandung yang antreannya panjang, lalu mengajak kembali ke comfort food lewat promo Diskon Puas No Limit dari GrabFood.',
+		cover: '/gallery/reel-06.webp'
 	},
 	{
-		id: 'r2',
+		id: 'r5',
 		no: 'II',
-		code: 'DbnMTkfzvMC',
-		title: 'Bandung ke Denpasar Terbang Langsung',
+		code: 'DcxjYBwPr1f',
+		title: 'Road to Ionation 7th, Workout dan Wellness',
 		roles: ['Voice Over'],
-		brand: 'Garuda Indonesia',
+		brand: 'Ion Water by Pocari Sweat',
 		account: '@infobdgcom',
-		date: '4 Agustus 2026',
-		topic: 'Penerbangan dan perjalanan',
-		note: 'Mengisi narasi kabar rute langsung Bandung menuju Denpasar lewat Bandara Husein Sastranegara, lengkap dengan gambaran layanan di dalam pesawat.',
-		cover: '/gallery/reel-02.webp'
-	},
-	{
-		id: 'r3',
-		no: 'III',
-		code: 'Db41xWjPf8K',
-		title: 'Eiger Women Flagship Store Buka di Bandung',
-		roles: ['Voice Over'],
-		brand: 'Eiger',
-		account: '@infobdgcom',
-		date: '11 Agustus 2026',
-		topic: 'Peritel dan gaya hidup luar ruang',
-		note: 'Meliput pembukaan gerai utama Eiger Women di Jalan Sumatra, berkeliling dari rak perlengkapan sampai layanan garansi seumur hidup.',
-		cover: '/gallery/reel-03.webp'
+		date: '2 September 2026',
+		topic: 'Olahraga dan kebugaran',
+		note: 'Mengisi narasi sesi olahraga bersama di Setiabudhi Social Club Bandung, rangkaian menuju festival kebugaran Ionation ketujuh.',
+		cover: '/gallery/reel-05.webp'
 	},
 	{
 		id: 'r4',
-		no: 'IV',
+		no: 'III',
 		code: 'DcLjH4APliX',
 		title: 'Medikacom Carnaval, Kreativitas Tanpa Batas',
 		roles: ['Voice Over'],
@@ -266,17 +255,43 @@ export const gallery: GalleryItem[] = [
 		cover: '/gallery/reel-04.webp'
 	},
 	{
-		id: 'r5',
-		no: 'V',
-		code: 'DcxjYBwPr1f',
-		title: 'Road to Ionation 7th, Workout dan Wellness',
+		id: 'r3',
+		no: 'IV',
+		code: 'Db41xWjPf8K',
+		title: 'Eiger Women Flagship Store Buka di Bandung',
 		roles: ['Voice Over'],
-		brand: 'Ion Water by Pocari Sweat',
+		brand: 'Eiger',
 		account: '@infobdgcom',
-		date: '2 September 2026',
-		topic: 'Olahraga dan kebugaran',
-		note: 'Mengisi narasi sesi olahraga bersama di Setiabudhi Social Club Bandung, rangkaian menuju festival kebugaran Ionation ketujuh.',
-		cover: '/gallery/reel-05.webp'
+		date: '11 Agustus 2026',
+		topic: 'Peritel dan gaya hidup luar ruang',
+		note: 'Meliput pembukaan gerai utama Eiger Women di Jalan Sumatra, berkeliling dari rak perlengkapan sampai layanan garansi seumur hidup.',
+		cover: '/gallery/reel-03.webp'
+	},
+	{
+		id: 'r2',
+		no: 'V',
+		code: 'DbnMTkfzvMC',
+		title: 'Bandung ke Denpasar Terbang Langsung',
+		roles: ['Voice Over'],
+		brand: 'Garuda Indonesia',
+		account: '@infobdgcom',
+		date: '4 Agustus 2026',
+		topic: 'Penerbangan dan perjalanan',
+		note: 'Mengisi narasi kabar rute langsung Bandung menuju Denpasar lewat Bandara Husein Sastranegara, lengkap dengan gambaran layanan di dalam pesawat.',
+		cover: '/gallery/reel-02.webp'
+	},
+	{
+		id: 'r1',
+		no: 'VI',
+		code: 'Dbfl901PIbp',
+		title: 'Destinasi Cantik Baru di Bandung',
+		roles: ['Model', 'Voice Over'],
+		brand: 'Melinda Aesthetic Center',
+		account: '@infobdgcom',
+		date: '1 Agustus 2026',
+		topic: 'Kecantikan dan perawatan kulit',
+		note: 'Menyusuri klinik kecantikan yang baru dibuka di Bandung, dari ruang konsultasi sampai teknologi perawatan yang ditawarkan.',
+		cover: '/gallery/reel-01.webp'
 	}
 ];
 
