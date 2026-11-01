@@ -9,6 +9,8 @@
 	--color-sand: #e7dbd1;
 	--color-blush: #ecd6d2;
 	--color-rose: #c48d90;
+	/* rose yang lebih dalam untuk teks, supaya tetap terbaca di atas ivory */
+	--color-roseink: #a0646a;
 	--color-mocha: #8d766c;
 	--color-ink: #241d1b;
 	--color-noir: #14100f;
@@ -46,6 +48,19 @@
 		/* tinggi dokumen diatur sendiri oleh mesin gulir, jadi penjangkaran
 		   bawaan peramban harus dimatikan supaya posisi tidak melompat */
 		overflow-anchor: none;
+	}
+
+	/* butiran kertas yang sangat halus di atas seluruh halaman, supaya
+	   ivory terasa seperti stok kertas, bukan warna layar yang datar */
+	body::after {
+		content: '';
+		position: fixed;
+		inset: 0;
+		z-index: 60;
+		pointer-events: none;
+		opacity: 0.05;
+		mix-blend-mode: multiply;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.24 0 0 0 0 0.2 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
 	}
 
 	button {

@@ -24,10 +24,9 @@
 <section id="jejak" class="trail">
 	<div class="wrap" use:panel={{ depth: 0.04, fade: 0.4 }}>
 		<div class="side" use:parallax={{ speed: 60 }}>
-			<SectionHeading eyebrow="Jejak" title="Yang sudah" italic="dilalui." />
+			<SectionHeading title="Experience" italic="so far." />
 			<p class="say reveal" use:reveal={{ delay: 150 }}>
-				Sebagian kecil dari perjalanan, dari acara himpunan yang sederhana sampai panggung dengan
-				ribuan pasang mata.
+				Organisations, teaching and paid work, from Bali to Bandung.
 			</p>
 		</div>
 
@@ -80,8 +79,8 @@
 		margin-top: 2rem;
 		max-width: 24rem;
 		font-size: 0.94rem;
-		line-height: 1.95;
-		color: var(--color-mocha);
+		line-height: 1.9;
+		color: var(--color-dusk);
 	}
 
 	ol {
@@ -148,7 +147,7 @@
 		position: absolute;
 		top: 0.4rem;
 		left: 2rem;
-		color: var(--color-rose);
+		color: var(--color-roseink);
 	}
 	@media (min-width: 768px) {
 		.year {
@@ -174,7 +173,7 @@
 		margin-top: 0.8rem;
 		max-width: 32rem;
 		font-size: 0.92rem;
-		line-height: 1.95;
-		color: var(--color-mocha);
+		line-height: 1.9;
+		color: var(--color-dusk);
 	}
 </style>

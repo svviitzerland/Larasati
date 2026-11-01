@@ -52,12 +52,12 @@
 <svelte:window on:keydown={onKey} on:message={onMessage} />
 
 {#if viewer.open}
-	<div class="viewer" role="dialog" aria-modal="true" aria-label="Pemutar reel Instagram">
+	<div class="viewer" role="dialog" aria-modal="true" aria-label="Instagram reel player">
 		<button
 			class="backdrop"
 			transition:fade={{ duration: 400 }}
 			onclick={closeViewer}
-			aria-label="Tutup tampilan"
+			aria-label="Close player"
 		></button>
 
 		<span class="beam" transition:fade={{ duration: 800 }} aria-hidden="true"></span>
@@ -68,7 +68,7 @@
 					<iframe
 						bind:this={frame}
 						class="reel"
-						title="Reel Instagram {item.title}"
+						title="Instagram reel: {item.title}"
 						src="https://www.instagram.com/reel/{item.code}/embed/"
 						style:height={frameHeight ? `${frameHeight}px` : null}
 						allow="encrypted-media; picture-in-picture; clipboard-write"
@@ -78,12 +78,12 @@
 				</div>
 
 				<div class="note" in:fly={{ y: 26, duration: 750, delay: 120, easing: cubicOut }}>
-					<p class="gold label-caps">Karya {item.no} · {item.date}</p>
+					<p class="gold label-caps">Work {item.no} · {item.date}</p>
 					<h3 class="font-display">{item.title}</h3>
 					<p class="say">{item.note}</p>
 
 					<dl>
-						{#each [['Peran', item.roles.join(', ')], ['Klien', item.brand], ['Topik', item.topic], ['Akun', item.account], ['Tayang', item.date]] as [key, value] (key)}
+						{#each [['Role', item.roles.join(', ')], ['Client', item.brand], ['Topic', item.topic], ['Account', item.account], ['Aired', item.date]] as [key, value] (key)}
 							<div>
 								<dt class="label-caps">{key}</dt>
 								<dd class="font-display">{value}</dd>
@@ -97,20 +97,23 @@
 						target="_blank"
 						rel="noreferrer noopener"
 					>
-						Buka di Instagram
+						Open on Instagram
 					</a>
 				</div>
 			{/key}
 		</div>
 
-		<button class="ctrl close" onclick={closeViewer} transition:fade aria-label="Tutup">
+		<button class="ctrl close" onclick={closeViewer} transition:fade aria-label="Close">
 			<span></span><span></span>
 		</button>
-		<button class="ctrl left" onclick={prev} transition:fade aria-label="Reel sebelumnya">‹</button>
-		<button class="ctrl right" onclick={next} transition:fade aria-label="Reel berikutnya">›</button
+		<button class="ctrl left" onclick={prev} transition:fade aria-label="Previous reel"
+			><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg></button
+		>
+		<button class="ctrl right" onclick={next} transition:fade aria-label="Next reel"
+			><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg></button
 		>
 
-		<p class="tally label-caps" transition:fade>{viewer.index + 1} dari {gallery.length}</p>
+		<p class="tally label-caps" transition:fade>{viewer.index + 1} of {gallery.length}</p>
 	</div>
 {/if}
 
@@ -246,9 +249,6 @@
 		border: 1px solid color-mix(in srgb, var(--color-ivory) 20%, transparent);
 		background: color-mix(in srgb, var(--color-noir) 70%, transparent);
 		color: var(--color-ivory);
-		font-family: var(--font-display);
-		font-size: 1.6rem;
-		line-height: 1;
 		transition:
 			background-color 0.5s var(--ease-silk),
 			border-color 0.5s var(--ease-silk),
@@ -258,6 +258,15 @@
 		background: color-mix(in srgb, var(--color-ivory) 12%, transparent);
 		border-color: var(--color-gold);
 		color: var(--color-gold);
+	}
+	.ctrl svg {
+		width: 1rem;
+		height: 1rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.3;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
 	.close {
 		top: 1.5rem;

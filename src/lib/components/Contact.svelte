@@ -14,18 +14,14 @@
 	</div>
 
 	<div class="wrap">
-		<p class="eyebrow reveal label-caps" use:reveal={{ y: '12px', blur: 0 }}>Kontak</p>
-
 		<h2 class="font-display" use:reveal>
-			<span class="line-mask"><span>Mari bekerja sama</span></span>
-			<span class="line-mask" style="--rv-delay:140ms"
-				><span class="rose">di acara Anda berikutnya</span></span
-			>
+			<span class="line-mask"><span>Have a project</span></span>
+			<span class="line-mask" style="--rv-delay:140ms"><span class="rose">in mind?</span></span>
 		</h2>
 
 		<p class="say reveal" use:reveal={{ delay: 220 }}>
-			Terbuka untuk membawakan acara, membantu kepanitiaan, atau berdiskusi soal teknologi. Kirim
-			surel dan ceritakan acaranya.
+			For hosting, voice over or on-camera work, send me an email with the date, location and a
+			short brief. You can also reach me on Instagram.
 		</p>
 
 		<a
@@ -33,7 +29,7 @@
 			href="mailto:{profile.email}"
 			use:reveal={{ delay: 320 }}
 			use:magnetic={0.18}
-			data-cursor="Kirim"
+			data-cursor="Email"
 		>
 			{profile.email}
 		</a>
@@ -92,25 +88,21 @@
 		max-width: 1100px;
 		margin-inline: auto;
 	}
-	.eyebrow {
-		color: var(--color-mocha);
-		margin-bottom: 2rem;
-	}
 	h2 {
 		font-size: clamp(2.3rem, 6.6vw, 5.4rem);
 		line-height: 1.04;
 		font-weight: 300;
 	}
 	.rose {
-		color: var(--color-rose);
+		color: var(--color-roseink);
 		font-style: italic;
 	}
 	.say {
 		margin: 2.2rem auto 0;
 		max-width: 30rem;
 		font-size: 0.95rem;
-		line-height: 1.95;
-		color: var(--color-mocha);
+		line-height: 1.9;
+		color: var(--color-dusk);
 	}
 
 	.mail {

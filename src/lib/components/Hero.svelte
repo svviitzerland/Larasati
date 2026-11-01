@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { onFrame } from '$lib/scroll.svelte';
+	import { glideToId, onFrame } from '$lib/scroll.svelte';
 
 	let started = $state(false);
-	let cue = $state(true);
 
 	let stage = $state<HTMLElement | null>(null);
 	let beam = $state<HTMLElement | null>(null);
 	let title = $state<HTMLElement | null>(null);
+	let first = $state<HTMLElement | null>(null);
+	let second = $state<HTMLElement | null>(null);
+	let center = $state<HTMLElement | null>(null);
 
 	// lampu sorot yang mengejar kursor dengan lembut
 	let aimX = 0;
@@ -43,8 +45,18 @@
 				title.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0)`;
 			}
 
-			const near = state.y < state.viewportH * 0.25;
-			if (near !== cue) cue = near;
+			// saat mulai digulir, dua baris nama merenggang ke arah berlawanan
+			const leave = Math.min(Math.max(state.y / Math.max(state.viewportH, 1), 0), 1);
+			const spread = leave * Math.min(state.viewportW, 1400) * 0.06;
+			if (first) first.style.transform = `translate3d(${(-spread).toFixed(1)}px, 0, 0)`;
+			if (second) second.style.transform = `translate3d(${spread.toFixed(1)}px, 0, 0)`;
+			// seluruh isi beranda mundur pelan dan memudar, seperti tirai
+			// yang ditarik sebelum bagian berikutnya naik
+			if (center) {
+				center.style.opacity = (1 - leave * 0.85).toFixed(3);
+				center.style.filter = leave > 0.02 ? `blur(${(leave * 3).toFixed(2)}px)` : 'none';
+				center.style.scale = (1 - leave * 0.06).toFixed(4);
+			}
 		});
 	});
 
@@ -63,7 +75,7 @@
 	class:started
 	class:is-in={started}
 	onpointermove={aim}
-	aria-label="Beranda"
+	aria-label="Home"
 >
 	<div class="ambient" aria-hidden="true">
 		<span class="orb one"></span>
@@ -82,14 +94,22 @@
 		<path d="M18 520 V214 A182 182 0 0 1 382 214 V520" />
 	</svg>
 
-	<h1 bind:this={title} class="name font-display">
-		<span class="line-mask" style="--rv-delay:200ms"><span>Larasati</span></span>
-		<span class="line-mask" style="--rv-delay:360ms"><span class="soft">Putri Maharani</span></span>
-	</h1>
+	<div bind:this={center} class="center">
+		<h1 bind:this={title} class="name font-display">
+			<span bind:this={first} class="row">
+				<span class="line-mask" style="--rv-delay:200ms"><span>Larasati</span></span>
+			</span>
+			<span bind:this={second} class="row">
+				<span class="line-mask" style="--rv-delay:360ms"
+					><span class="soft">Putri Maharani</span></span
+				>
+			</span>
+		</h1>
 
-	<div class="cue" class:show={cue} aria-hidden="true">
-		<span class="track"><span></span></span>
-		<span class="label-caps">Gulir</span>
+		<button type="button" class="see" onclick={() => glideToId('galeri')} data-cursor="View">
+			<span>See the work</span>
+			<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" /></svg>
+		</button>
 	</div>
 </section>
 
@@ -100,7 +120,7 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 100svh;
-		padding: 8rem 1.5rem 9rem;
+		padding: 8rem 1.5rem 7rem;
 		overflow: hidden;
 		text-align: center;
 	}
@@ -191,13 +211,23 @@
 		stroke-dashoffset: 0;
 	}
 
-	/* --- nama --- */
+	.center {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
 	.name {
 		position: relative;
 		font-size: clamp(3.2rem, 12vw, 9.5rem);
-		line-height: 0.9;
+		line-height: 0.92;
 		font-weight: 300;
 		letter-spacing: -0.015em;
+	}
+	.row {
+		display: block;
+		will-change: transform;
 	}
 	.soft {
 		display: block;
@@ -205,36 +235,44 @@
 		font-style: italic;
 	}
 
-	/* --- petunjuk gulir, tepat di tengah bawah --- */
-	.cue {
-		position: absolute;
-		bottom: 2.4rem;
-		left: 50%;
-		display: flex;
-		flex-direction: column;
+	.see {
+		display: inline-flex;
 		align-items: center;
-		gap: 0.9rem;
-		color: var(--color-mocha);
-		transform: translateX(-50%);
+		gap: 0.7rem;
+		margin-top: 2.6rem;
+		padding: 0.85rem 1.5rem;
+		border: 1px solid color-mix(in srgb, var(--color-rose) 55%, transparent);
+		border-radius: 999px;
+		font-size: 0.82rem;
+		letter-spacing: 0.04em;
+		color: var(--color-ink);
 		opacity: 0;
-		transition: opacity 1s var(--ease-silk) 1.3s;
+		transform: translateY(10px);
+		transition:
+			opacity 1.2s var(--ease-silk) 1s,
+			transform 1.2s var(--ease-silk) 1s,
+			background-color 0.5s var(--ease-silk),
+			border-color 0.5s var(--ease-silk);
 	}
-	.cue.show {
+	.started .see {
 		opacity: 1;
+		transform: none;
 	}
-	.track {
-		position: relative;
-		display: block;
-		width: 1px;
-		height: 3.4rem;
-		overflow: hidden;
-		background: var(--color-sand);
+	.see:hover {
+		background: var(--color-blush);
+		border-color: var(--color-blush);
 	}
-	.track span {
-		position: absolute;
-		inset-inline: 0;
-		height: 50%;
-		background: var(--color-rose);
-		animation: cue 2.4s ease-in-out infinite;
+	.see svg {
+		width: 0.9rem;
+		height: 0.9rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.3;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		transition: transform 0.5s var(--ease-silk);
+	}
+	.see:hover svg {
+		transform: translateY(2px);
 	}
 </style>

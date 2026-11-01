@@ -1,32 +1,19 @@
 <script lang="ts">
-	import { tick } from 'svelte';
-	import { crafts, gallery, type Craft } from '$lib/data';
-	import { onFrame, onResize } from '$lib/scroll.svelte';
+	import { gallery, type Craft } from '$lib/data';
+	import { reveal } from '$lib/actions/reveal';
+	import { parallax } from '$lib/actions/motion';
+	import { onFrame } from '$lib/scroll.svelte';
 	import { openViewer } from '$lib/viewer.svelte';
+	import SectionHeading from './SectionHeading.svelte';
+
+	const [latest, ...rest] = gallery;
 
 	let section = $state<HTMLElement | null>(null);
-	let stage = $state<HTMLElement | null>(null);
-	let rail = $state<HTMLElement | null>(null);
-
-	let pinned = $state(false);
-	let height = $state(0);
-	let active = $state(0);
-	let progress = $state(0);
-
-	let travel = 0;
-	let railX = 0;
-
-	// ruang masuk dan ruang keluar, tempat terang melebur jadi gelap
-	// dan sebaliknya. Bingkai baru muncul setelah dinding benar benar gelap.
-	let lead = $state(0);
-	let tail = $state(0);
+	let cover = $state<HTMLElement | null>(null);
 
 	// cahaya ruangan yang mengikuti kursor
 	let lightX = $state(50);
 	let lightY = $state(35);
-
-	const clamp = (v: number, a: number, b: number) => Math.min(Math.max(v, a), b);
-	const hang = ['0rem', '2.5rem', '1rem', '3.25rem'];
 
 	// nama pendek untuk lencana di sudut sampul, ruangnya sempit
 	const short: Record<Craft, string> = {
@@ -36,64 +23,26 @@
 	};
 	const badge = (roles: Craft[]) => roles.map((role) => short[role]).join(' · ');
 
-	async function measure() {
-		if (!section || !rail || !stage) return;
+	// tiap kolom tertinggal dengan laju berbeda, seperti foto yang
+	// digantung tidak rata di dinding
+	const drift = [10, 60, 25, 75, 35, 55];
 
-		const wide = window.innerWidth >= 1024;
-		const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		pinned = wide && !calm;
-
-		// tunggu kelas terpasang dulu, karena lebar lorong hanya benar
-		// setelah tata letak menyamping aktif
-		await tick();
-
-		if (!pinned) {
-			height = 0;
-			travel = 0;
-			lead = 0;
-			tail = 0;
-			stage.style.transform = '';
-			rail.style.transform = '';
-			return;
-		}
-
-		lead = Math.round(window.innerHeight * 0.34);
-		tail = Math.round(window.innerHeight * 0.34);
-		travel = Math.max(rail.scrollWidth - window.innerWidth, 0);
-
-		const next = lead + window.innerHeight + travel + tail;
-		if (Math.abs(next - height) > 1) height = next;
-	}
-
+	/**
+	 * Satu momen gulir untuk karya terbaru. Sampulnya masuk sebagai lengkung
+	 * kecil, senada dengan potret di beranda, lalu membuka menjadi bingkai
+	 * reel utuh ketika sampai di tengah layar.
+	 */
 	$effect(() => {
-		if (!section || !stage || !rail) return;
-
-		measure();
-		const stopResize = onResize(measure);
-
-		const stopFrame = onFrame(() => {
-			if (!pinned || !stage || !rail || !section) return;
-
-			// jarak yang sudah ditempuh di dalam lorong, dihitung setelah
-			// ruang masuk terlewati supaya bingkai selalu berada di dinding gelap
-			const passed = clamp(-section.getBoundingClientRect().top - lead, 0, travel);
-			stage.style.transform = `translate3d(0, ${passed.toFixed(2)}px, 0)`;
-
-			const p = travel > 0 ? passed / travel : 0;
-			const nextX = -p * travel;
-			const swing = clamp((nextX - railX) * 0.06, -3.2, 3.2);
-			railX = nextX;
-			rail.style.transform = `translate3d(${railX.toFixed(2)}px, 0, 0) skewX(${swing.toFixed(2)}deg)`;
-
-			progress = p;
-			const index = clamp(Math.round(p * (gallery.length - 1)), 0, gallery.length - 1);
-			if (index !== active) active = index;
+		if (!cover) return;
+		const el = cover;
+		return onFrame((state) => {
+			const rect = el.getBoundingClientRect();
+			if (rect.top > state.viewportH || rect.bottom < 0) return;
+			const seen = (state.viewportH - rect.top) / (state.viewportH * 0.7);
+			const t = Math.min(Math.max(seen, 0), 1);
+			const eased = 1 - Math.pow(1 - t, 3);
+			el.style.setProperty('--open', eased.toFixed(4));
 		});
-
-		return () => {
-			stopResize();
-			stopFrame();
-		};
 	});
 
 	function trackLight(event: PointerEvent) {
@@ -104,19 +53,10 @@
 	}
 </script>
 
-<section
-	id="galeri"
-	bind:this={section}
-	class="hall"
-	class:pinned
-	style:height={pinned ? `${height}px` : 'auto'}
-	style:--lead={pinned ? `${lead}px` : undefined}
-	style:--tail={pinned ? `${tail}px` : undefined}
-	onpointermove={trackLight}
-	aria-label="Galeri reel Instagram"
->
-	<!-- gerbang lengkung, senada dengan bingkai potret di beranda.
-	     Terang di luar, gelap di dalam, tanpa garis batas mendatar. -->
+<!-- Tautan Instagram memang menuju ke luar situs. -->
+<!-- eslint-disable svelte/no-navigation-without-resolve -->
+<section id="galeri" bind:this={section} class="hall" onpointermove={trackLight} aria-label="Work">
+	<!-- gerbang lengkung: terang di luar, gelap di dalam, tanpa garis batas mendatar -->
 	<div class="portal in" aria-hidden="true">
 		<span class="ring"></span>
 		<span class="arch"></span>
@@ -128,92 +68,97 @@
 	<div class="room" aria-hidden="true">
 		<span
 			class="lamplight"
-			style="background: radial-gradient(48rem 48rem at {lightX}% {lightY}%, rgba(255,232,198,0.1), transparent 62%)"
+			style="background: radial-gradient(48rem 48rem at {lightX}% {lightY}%, rgba(255,232,198,0.09), transparent 62%)"
 		></span>
-		<span class="ceiling"></span>
 		<span class="texture"></span>
 	</div>
 
-	<div bind:this={stage} class="stage">
-		<div bind:this={rail} class="rail">
-			<div class="intro">
-				<p class="eyebrow label-caps">Galeri</p>
-				<h2 class="font-display">
-					Panggung,<br /><span class="gold">Suara, Layar</span>
-				</h2>
-				<p class="say">
-					Tiga peran yang saya kerjakan, membawakan acara, mengisi suara, dan berdiri di depan
-					kamera. Yang tersimpan di sini baru sebagiannya dan daftarnya masih terus bertambah.
+	<div class="inner">
+		<header class="head">
+			<SectionHeading title="Recent" italic="work." tone="dark" />
+			<p class="say reveal" use:reveal={{ delay: 160 }}>
+				Most of these aired on {latest.account}. Choose a cover to watch the reel right here.
+			</p>
+		</header>
+
+		<!-- karya terbaru tampil paling besar -->
+		<article class="feature">
+			<button
+				bind:this={cover}
+				type="button"
+				class="feature-cover"
+				onclick={() => openViewer(0)}
+				data-cursor="Play"
+				aria-label="Play {latest.title} for {latest.brand}"
+			>
+				<img src={latest.cover} alt="Cover of the {latest.title} reel" />
+				<span class="shade" aria-hidden="true"></span>
+				<span class="fresh">Latest</span>
+				<span class="play big" aria-hidden="true"></span>
+			</button>
+
+			<div class="feature-info">
+				<h3 class="feature-title reveal font-display" use:reveal={{ delay: 80 }}>
+					{latest.title}
+				</h3>
+				<p class="feature-brand reveal" use:reveal={{ delay: 140 }}>
+					{latest.brand} <span>· {latest.date}</span>
 				</p>
-				<ul class="crafts">
-					{#each crafts as craft (craft)}
-						<li class="label-caps">{craft}</li>
+				<ul class="roles reveal" use:reveal={{ delay: 200 }}>
+					{#each latest.roles as role (role)}
+						<li>{role}</li>
 					{/each}
 				</ul>
-				<p class="hint label-caps">
-					{pinned ? 'Gulir untuk melihat karya berikutnya' : 'Ketuk sampul untuk memutar karya'}
-				</p>
+				<p class="feature-note reveal" use:reveal={{ delay: 260 }}>{latest.note}</p>
+				<div class="actions reveal" use:reveal={{ delay: 320 }}>
+					<button type="button" class="watch" onclick={() => openViewer(0)}>
+						<span class="play small" aria-hidden="true"></span>
+						Play reel
+					</button>
+					<a
+						class="out"
+						href="https://www.instagram.com/reel/{latest.code}/"
+						target="_blank"
+						rel="noreferrer noopener"
+					>
+						Open on Instagram
+					</a>
+				</div>
 			</div>
+		</article>
 
-			{#each gallery as item, i (item.id)}
-				<button
-					type="button"
-					class="piece"
-					class:near={i === active}
-					style:--hang={hang[i % hang.length]}
-					onclick={() => openViewer(i)}
-					data-cursor="Putar"
-					aria-label="Putar karya {item.no}, {item.title} bersama {item.brand}, sebagai {item.roles.join(
-						' dan '
-					)}"
-				>
-					<span class="lamp" aria-hidden="true"></span>
-					<span class="cone" aria-hidden="true"></span>
-
-					<span class="frame">
-						<span class="mat">
+		<!-- sisanya berderet, tetap dengan nama brand dan perannya -->
+		<div class="more">
+			<p class="more-title reveal font-display" use:reveal={{ y: '12px', blur: 0 }}>More work</p>
+			<ul class="grid">
+				{#each rest as item, i (item.id)}
+					<li use:parallax={{ speed: drift[i % drift.length] }}>
+						<button
+							type="button"
+							class="tile reveal"
+							use:reveal={{ delay: (i % 3) * 110, y: '40px' }}
+							onclick={() => openViewer(i + 1)}
+							data-cursor="Play"
+							aria-label="Play {item.title} for {item.brand}, {item.roles.join(' and ')}"
+						>
 							<span class="crop">
-								<img
-									src={item.cover}
-									alt="Sampul reel {item.title} bersama {item.brand}"
-									loading="lazy"
-								/>
-								<span class="tag label-caps" aria-hidden="true">{badge(item.roles)}</span>
+								<img src={item.cover} alt="Cover of the {item.title} reel" loading="lazy" />
+								<span class="tag" aria-hidden="true">{badge(item.roles)}</span>
 								<span class="play" aria-hidden="true"></span>
 							</span>
-						</span>
-						<span class="glass" aria-hidden="true"></span>
-					</span>
-
-					<span class="pool" aria-hidden="true"></span>
-
-					<span class="plaque">
-						<span class="no label-caps">{item.no} · {item.date}</span>
-						<span class="title font-display">{item.title}</span>
-						<span class="meta">{item.brand}</span>
-						<span class="place">{item.account} · {item.topic}</span>
-					</span>
-				</button>
-			{/each}
-
-			<div class="outro">
-				<p class="font-display">Daftar ini terus bertambah</p>
-				<p class="say">Terbuka untuk kerja sama berikutnya.</p>
-			</div>
-		</div>
-
-		<div class="hud" aria-hidden="true">
-			<span class="count font-display">{gallery[active].no}</span>
-			<span class="bar"><span style:transform="scaleX({progress})"></span></span>
-			<span class="count muted font-display">{gallery[gallery.length - 1].no}</span>
+							<span class="tile-brand">{item.brand}</span>
+							<span class="tile-title font-display">{item.title}</span>
+						</button>
+					</li>
+				{/each}
+			</ul>
 		</div>
 	</div>
 </section>
 
 <style>
 	.hall {
-		/* tinggi sampul di dalam lorong, dipakai ulang untuk menghitung lebar */
-		--reel: min(50svh, 33rem);
+		--portal: clamp(12rem, 30vh, 18rem);
 		position: relative;
 		overflow: hidden;
 		background: var(--color-noir);
@@ -224,61 +169,43 @@
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
+		/* suasana dipudarkan di kedua ujung supaya tidak ada tepi saat warna berganti */
+		mask-image: linear-gradient(
+			to bottom,
+			transparent 0,
+			#000 var(--portal),
+			#000 calc(100% - var(--portal)),
+			transparent 100%
+		);
 	}
 	.lamplight,
-	.ceiling,
 	.texture {
 		position: absolute;
 		inset: 0;
 	}
-
-	/* semua lapisan suasana dipudarkan di kedua ujung supaya tidak ada
-	   satu pun tepi yang terlihat saat warna berganti */
-	.lamplight,
 	.texture {
-		mask-image: linear-gradient(
-			to bottom,
-			transparent 0,
-			#000 var(--lead, 34vh),
-			#000 calc(100% - var(--tail, 34vh)),
-			transparent 100%
-		);
-	}
-	.ceiling {
-		top: var(--lead, 34vh);
-		background: radial-gradient(90% 45% at 50% 0%, rgba(255, 236, 204, 0.12), transparent 70%);
-		/* sinar langit langit ikut memudar di awal supaya tidak meninggalkan
-		   garis tepat di tempat warna selesai berganti */
-		mask-image: linear-gradient(to bottom, transparent 0, #000 22vh);
-	}
-	.texture {
-		opacity: 0.4;
+		opacity: 0.35;
 		mix-blend-mode: overlay;
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 	}
 
-	/* peralihan warna terjadi di dalam bagian ini sendiri, bukan lewat
-	   elemen terpisah, sehingga tidak ada garis batas sama sekali */
 	/* --- gerbang masuk dan keluar --- */
 	.portal {
 		position: absolute;
 		inset-inline: 0;
+		height: var(--portal);
 		overflow: hidden;
 		pointer-events: none;
 	}
 	.portal.in {
 		top: 0;
-		height: var(--lead, 34vh);
 		background: var(--color-ivory);
 	}
 	.portal.out {
 		bottom: 0;
-		height: var(--tail, 34vh);
 		background: var(--color-mist);
 	}
-
-	/* lengkungnya sengaja lebih lebar dari layar supaya bahunya keluar
-	   dari tepi dan tidak menyisakan sudut yang bersiku */
+	/* lengkungnya lebih lebar dari layar supaya bahunya keluar dari tepi */
 	.arch {
 		position: absolute;
 		left: 50%;
@@ -302,8 +229,6 @@
 			inset 0 -34px 60px -28px rgba(0, 0, 0, 0.85),
 			0 6px 70px rgba(255, 232, 196, 0.16);
 	}
-
-	/* garis lengkung tipis mengelilingi gerbang */
 	.ring {
 		position: absolute;
 		left: 50%;
@@ -316,368 +241,344 @@
 		border-radius: 50% 50% 0 0 / 40% 40% 0 0;
 	}
 
-	/* --- panggung yang menempel di layar selama bagian ini dilewati --- */
-	.stage {
+	.inner {
 		position: relative;
-		padding-block: 38vh;
+		max-width: 1300px;
+		margin-inline: auto;
+		padding: calc(var(--portal) + 2rem) 1.5rem calc(var(--portal) + 3rem);
 	}
-	.pinned .stage {
-		position: absolute;
-		inset-inline: 0;
-		top: var(--lead, 0px);
-		height: 100svh;
-		display: flex;
-		align-items: center;
-		padding-block: 0;
-		will-change: transform;
-	}
-
-	.rail {
-		display: grid;
-		gap: 5rem;
-		padding-inline: 1.5rem;
-	}
-	@media (min-width: 640px) {
-		.rail {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 4rem 2.5rem;
+	@media (min-width: 768px) {
+		.inner {
 			padding-inline: 3rem;
 		}
 	}
-	.pinned .rail {
-		display: flex;
-		align-items: center;
-		gap: 5vw;
-		width: max-content;
-		padding-inline: 8vw;
-		grid-template-columns: none;
-		will-change: transform;
-	}
 
-	/* --- teks pembuka dan penutup lorong --- */
-	.intro,
-	.outro {
-		max-width: 34rem;
-	}
-	.pinned .intro {
-		width: 30rem;
-		flex-shrink: 0;
-	}
-	.pinned .outro {
-		width: 24rem;
-		flex-shrink: 0;
-	}
-	.eyebrow {
-		color: var(--color-gold);
-		margin-bottom: 1.6rem;
-	}
-	.intro h2 {
-		font-size: clamp(2.4rem, 5vw, 4rem);
-		line-height: 1.02;
-		font-weight: 300;
-		margin-bottom: 1.8rem;
-	}
-	.gold {
-		color: var(--color-gold);
-		font-style: italic;
+	.head {
+		max-width: 40rem;
 	}
 	.say {
-		font-size: 0.94rem;
-		line-height: 1.95;
-		color: color-mix(in srgb, var(--color-ivory) 58%, transparent);
-	}
-	.crafts {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		margin-top: 1.8rem;
-	}
-	.crafts li {
-		padding: 0.5rem 0.8rem;
-		color: color-mix(in srgb, var(--color-ivory) 62%, transparent);
-		border: 1px solid color-mix(in srgb, var(--color-gold) 30%, transparent);
-		border-radius: 999px;
+		margin-top: 1.6rem;
+		max-width: 30rem;
+		font-size: 0.98rem;
+		line-height: 1.85;
+		color: color-mix(in srgb, var(--color-ivory) 66%, transparent);
 	}
 
-	.hint {
-		margin-top: 1.8rem;
-		color: color-mix(in srgb, var(--color-gold) 75%, transparent);
+	/* --- karya terbaru --- */
+	.feature {
+		display: grid;
+		gap: 2.6rem;
+		margin-top: 4.5rem;
 	}
-	.outro .font-display {
-		font-size: clamp(1.6rem, 3vw, 2.2rem);
-		margin-bottom: 1rem;
+	@media (min-width: 900px) {
+		.feature {
+			grid-template-columns: auto minmax(0, 1fr);
+			align-items: center;
+			gap: 5rem;
+			margin-top: 5.5rem;
+		}
 	}
 
-	/* --- satu karya --- */
-	.piece {
+	.feature-cover {
+		--open: 0;
 		position: relative;
 		display: block;
-		width: 100%;
-		max-width: 20rem;
-		text-align: left;
-		transition: transform 0.9s var(--ease-silk);
-	}
-	/* di lorong, tinggi gambar ditentukan layar sehingga tiap bingkai
-	   punya lebar berbeda persis seperti dinding pameran sungguhan */
-	.pinned .piece {
-		width: auto;
-		max-width: none;
-		flex-shrink: 0;
-		transform: translateY(var(--hang));
-	}
-	/* tinggi sampul ditentukan layar supaya satu bingkai utuh selalu muat
-	   dalam sekali tampilan, lebarnya mengikuti perbandingan reel 9 : 16.
-	   Lebar dihitung tegas, bukan diserahkan pada aspect-ratio, supaya
-	   Safari tidak melebarkan bingkai melebihi gambarnya. */
-	.pinned .crop {
-		display: block;
-		height: var(--reel);
-		width: calc(var(--reel) * 0.5625);
-	}
-	.pinned .plaque {
-		max-width: 18rem;
-	}
-
-	.lamp {
-		position: absolute;
-		top: -1.7rem;
-		left: 50%;
-		width: 3rem;
-		height: 6px;
-		margin-left: -1.5rem;
-		border-radius: 999px;
-		background: linear-gradient(180deg, #7a6a4e, var(--color-gold));
-		box-shadow: 0 6px 18px rgba(255, 226, 170, 0.4);
-	}
-	.lamp::after {
-		content: '';
-		position: absolute;
-		inset-inline: 30%;
-		bottom: -3px;
-		height: 4px;
-		border-radius: 999px;
-		background: #ffe9c2;
-		filter: blur(2px);
-	}
-
-	.cone {
-		position: absolute;
-		top: -1.3rem;
-		left: 50%;
-		width: 190%;
-		height: 128%;
-		margin-left: -95%;
-		clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
-		background: linear-gradient(to bottom, rgba(255, 233, 194, 0.28), rgba(255, 233, 194, 0) 74%);
-		filter: blur(20px);
-		opacity: 0.5;
-		pointer-events: none;
-		animation: flicker 7s ease-in-out infinite;
-		transition: opacity 0.9s var(--ease-silk);
-	}
-
-	.frame {
-		position: relative;
-		display: block;
-		padding: 0.6rem;
-		background: linear-gradient(150deg, #4a3b30, #2a211c 55%, #3d3129);
-		box-shadow:
-			0 40px 60px -35px rgba(0, 0, 0, 0.95),
-			inset 0 0 0 1px rgba(255, 226, 178, 0.18);
-		transition: box-shadow 0.9s var(--ease-silk);
-	}
-	.mat {
-		display: block;
-		padding: 1rem;
-		background: #ece2d5;
-		box-shadow: inset 0 0 22px rgba(90, 70, 50, 0.22);
-	}
-	.crop {
-		position: relative;
-		display: block;
-		width: 100%;
+		width: min(100%, 22rem);
 		aspect-ratio: 9 / 16;
+		margin-inline: auto;
 		overflow: hidden;
+		/* lengkung atas mengecil sampai jadi sudut biasa saat terbuka penuh */
+		border-radius: calc((1 - var(--open)) * 11rem + 0.6rem) calc((1 - var(--open)) * 11rem + 0.6rem)
+			0.6rem 0.6rem;
+		transform: scale(calc(0.86 + var(--open) * 0.14));
+		transform-origin: 50% 100%;
+		box-shadow:
+			0 50px 90px -40px rgba(0, 0, 0, 0.95),
+			0 0 0 1px color-mix(in srgb, var(--color-gold) 22%, transparent);
 	}
-	.crop img {
+	@media (min-width: 900px) {
+		.feature-cover {
+			width: auto;
+			height: min(76svh, 40rem);
+			margin-inline: 0;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.feature-cover {
+			border-radius: 0.6rem;
+			transform: none;
+		}
+	}
+	.feature-cover img {
 		display: block;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		filter: saturate(0.8) brightness(0.88);
-		transform: scale(1.01);
-		transition:
-			filter 1s var(--ease-silk),
-			transform 1.5s var(--ease-silk);
+		transition: transform 1.4s var(--ease-silk);
 	}
-	/* penanda bahwa yang dibingkai adalah unggahan, bukan sekadar foto */
-	.tag {
+	.feature-cover:hover img {
+		transform: scale(1.04);
+	}
+	.shade {
 		position: absolute;
-		top: 0.6rem;
-		left: 0.6rem;
-		padding: 0.32rem 0.5rem 0.3rem;
-		font-size: 0.5rem;
-		letter-spacing: 0.22em;
-		color: rgba(255, 255, 255, 0.9);
-		background: rgba(18, 14, 12, 0.42);
-		border: 1px solid rgba(255, 255, 255, 0.24);
+		inset: 0;
+		background: linear-gradient(to top, rgba(20, 16, 15, 0.45), transparent 40%);
 	}
+
+	.fresh {
+		position: absolute;
+		top: 0.9rem;
+		left: 0.9rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+		padding: 0.4rem 0.8rem 0.4rem 0.65rem;
+		border-radius: 999px;
+		font-size: 0.72rem;
+		color: #fff;
+		background: rgba(18, 14, 12, 0.55);
+		backdrop-filter: blur(6px);
+	}
+	.fresh::before {
+		content: '';
+		width: 0.45rem;
+		height: 0.45rem;
+		border-radius: 999px;
+		background: var(--color-gold);
+		box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-gold) 22%, transparent);
+	}
+	.feature-title {
+		max-width: 16ch;
+		font-size: clamp(2.2rem, 4.6vw, 3.8rem);
+		line-height: 1.04;
+		font-weight: 300;
+		text-wrap: balance;
+	}
+	.feature-brand {
+		margin-top: 1.2rem;
+		font-size: 1rem;
+		color: var(--color-ivory);
+	}
+	.feature-brand span {
+		color: color-mix(in srgb, var(--color-ivory) 55%, transparent);
+	}
+	.roles {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 1.4rem;
+	}
+	.roles li {
+		padding: 0.4rem 0.9rem;
+		border: 1px solid color-mix(in srgb, var(--color-gold) 40%, transparent);
+		border-radius: 999px;
+		font-size: 0.74rem;
+		letter-spacing: 0.04em;
+		color: color-mix(in srgb, var(--color-ivory) 82%, transparent);
+	}
+	.feature-note {
+		margin-top: 1.6rem;
+		max-width: 32rem;
+		font-size: 0.98rem;
+		line-height: 1.85;
+		color: color-mix(in srgb, var(--color-ivory) 66%, transparent);
+	}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 1.4rem;
+		margin-top: 2.2rem;
+	}
+	.watch {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.8rem;
+		padding: 0.9rem 1.5rem 0.9rem 1rem;
+		border-radius: 999px;
+		background: var(--color-ivory);
+		color: var(--color-noir);
+		font-size: 0.86rem;
+		transition:
+			background-color 0.5s var(--ease-silk),
+			transform 0.5s var(--ease-silk);
+	}
+	.watch:hover {
+		background: var(--color-blush);
+		transform: translateY(-2px);
+	}
+	.out {
+		font-size: 0.86rem;
+		color: color-mix(in srgb, var(--color-ivory) 72%, transparent);
+		text-decoration: underline;
+		text-decoration-color: color-mix(in srgb, var(--color-gold) 55%, transparent);
+		text-underline-offset: 0.35em;
+		transition: color 0.4s var(--ease-silk);
+	}
+	.out:hover {
+		color: var(--color-ivory);
+	}
+
+	/* --- tombol putar, digambar dengan CSS --- */
 	.play {
 		position: absolute;
 		top: 50%;
 		left: 50%;
 		display: grid;
 		place-items: center;
-		width: 3.2rem;
-		height: 3.2rem;
-		margin: -1.6rem 0 0 -1.6rem;
+		width: 3rem;
+		height: 3rem;
+		margin: -1.5rem 0 0 -1.5rem;
 		border-radius: 999px;
-		border: 1px solid rgba(255, 255, 255, 0.62);
-		background: rgba(18, 14, 12, 0.34);
+		border: 1px solid rgba(255, 255, 255, 0.7);
+		background: rgba(18, 14, 12, 0.38);
 		transition:
-			background-color 0.7s var(--ease-silk),
-			border-color 0.7s var(--ease-silk),
-			transform 0.7s var(--ease-silk);
+			background-color 0.6s var(--ease-silk),
+			border-color 0.6s var(--ease-silk),
+			transform 0.6s var(--ease-silk);
 	}
+	/* segitiga putar digambar dengan clip-path */
 	.play::after {
 		content: '';
+		width: 0.62rem;
+		height: 0.78rem;
 		margin-left: 3px;
-		border-left: 11px solid rgba(255, 255, 255, 0.94);
-		border-block: 7px solid transparent;
+		background: #fff;
+		clip-path: polygon(0 0, 100% 50%, 0 100%);
 	}
-
-	.glass {
-		position: absolute;
-		inset: 0.6rem;
-		background: linear-gradient(118deg, rgba(255, 255, 255, 0.14) 0%, transparent 42%);
-		opacity: 0.5;
-		transition: opacity 0.9s var(--ease-silk);
-		pointer-events: none;
+	.play.big {
+		width: 4.6rem;
+		height: 4.6rem;
+		margin: -2.3rem 0 0 -2.3rem;
 	}
-	.pool {
-		position: absolute;
-		left: 12%;
-		right: 12%;
-		height: 1.6rem;
-		border-radius: 50%;
-		background: radial-gradient(50% 50% at 50% 50%, rgba(255, 226, 178, 0.18), transparent 70%);
-		opacity: 0;
-		transition: opacity 0.9s var(--ease-silk);
+	.play.big::after {
+		width: 0.9rem;
+		height: 1.1rem;
+		margin-left: 4px;
 	}
-
-	.plaque {
-		display: block;
-		margin-top: 1.6rem;
-		padding-left: 1rem;
-		border-left: 1px solid color-mix(in srgb, var(--color-gold) 45%, transparent);
-		transition:
-			border-color 0.7s var(--ease-silk),
-			transform 0.9s var(--ease-silk);
+	.play.small {
+		position: relative;
+		top: auto;
+		left: auto;
+		width: 1.9rem;
+		height: 1.9rem;
+		margin: 0;
+		border: 0;
+		background: var(--color-noir);
 	}
-	.plaque > * {
-		display: block;
+	.play.small::after {
+		width: 0.44rem;
+		height: 0.56rem;
+		margin-left: 2px;
 	}
-	.plaque .no {
-		color: color-mix(in srgb, var(--color-gold) 85%, transparent);
-		margin-bottom: 0.6rem;
-	}
-	.title {
-		font-size: 1.3rem;
-		line-height: 1.3;
-	}
-	.meta {
-		margin-top: 0.5rem;
-		font-size: 0.78rem;
-		color: color-mix(in srgb, var(--color-ivory) 48%, transparent);
-	}
-	.place {
-		margin-top: 0.25rem;
-		font-size: 0.72rem;
-		font-style: italic;
-		color: color-mix(in srgb, var(--color-ivory) 32%, transparent);
-	}
-
-	.piece:hover,
-	.piece:focus-visible,
-	.piece.near {
-		transform: translateY(calc(var(--hang, 0rem) - 0.5rem));
-	}
-	.piece:hover .cone,
-	.piece:focus-visible .cone,
-	.piece.near .cone {
-		opacity: 1;
-	}
-	.piece:hover .crop img,
-	.piece:focus-visible .crop img,
-	.piece.near .crop img {
-		filter: saturate(1.04) brightness(1.02);
-		transform: scale(1.06);
-	}
-	.piece:hover .play,
-	.piece:focus-visible .play,
-	.piece.near .play {
+	.feature-cover:hover .play,
+	.tile:hover .play,
+	.tile:focus-visible .play {
 		border-color: var(--color-gold);
-		background: rgba(18, 14, 12, 0.55);
+		background: rgba(18, 14, 12, 0.6);
 		transform: scale(1.08);
 	}
-	.piece:hover .frame,
-	.piece:focus-visible .frame {
-		box-shadow:
-			0 60px 80px -40px rgba(0, 0, 0, 1),
-			inset 0 0 0 1px color-mix(in srgb, var(--color-gold) 55%, transparent);
+
+	/* --- deretan karya lainnya --- */
+	.more {
+		margin-top: 7rem;
 	}
-	.piece:hover .glass,
-	.piece:focus-visible .glass {
-		opacity: 0.85;
+	.more-title {
+		font-size: clamp(1.5rem, 2.6vw, 2rem);
+		font-style: italic;
+		font-weight: 300;
+		color: color-mix(in srgb, var(--color-ivory) 70%, transparent);
 	}
-	.piece:hover .pool,
-	.piece:focus-visible .pool,
-	.piece.near .pool {
-		opacity: 1;
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 2.6rem 1rem;
+		margin-top: 2.4rem;
 	}
-	.piece:hover .plaque,
-	.piece:focus-visible .plaque {
-		border-color: var(--color-gold);
-		transform: translateX(4px);
+	@media (min-width: 700px) {
+		.grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 3.5rem 1.6rem;
+		}
+	}
+	@media (min-width: 1200px) {
+		.grid {
+			grid-template-columns: repeat(6, minmax(0, 1fr));
+			gap: 3rem 1.4rem;
+			/* ruang untuk kolom yang turun lebih jauh */
+			padding-bottom: 3rem;
+		}
 	}
 
-	/* --- penunjuk posisi di dalam lorong --- */
-	.hud {
-		display: none;
+	.tile {
+		display: block;
+		width: 100%;
+		text-align: left;
 	}
-	.pinned .hud {
+	.crop {
+		position: relative;
+		display: block;
+		aspect-ratio: 9 / 16;
+		overflow: hidden;
+		border-radius: 0.5rem;
+		box-shadow:
+			0 30px 50px -30px rgba(0, 0, 0, 0.9),
+			0 0 0 1px rgba(255, 236, 204, 0.08);
+		transition: box-shadow 0.7s var(--ease-silk);
+	}
+	.crop img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		filter: saturate(0.82) brightness(0.9);
+		transition:
+			filter 0.9s var(--ease-silk),
+			transform 1.3s var(--ease-silk);
+	}
+	.tile:hover .crop img,
+	.tile:focus-visible .crop img {
+		filter: none;
+		transform: scale(1.05);
+	}
+	.tile:hover .crop,
+	.tile:focus-visible .crop {
+		box-shadow:
+			0 40px 60px -30px rgba(0, 0, 0, 1),
+			0 0 0 1px color-mix(in srgb, var(--color-gold) 60%, transparent);
+	}
+	.tag {
 		position: absolute;
-		bottom: 2.6rem;
-		left: 8vw;
-		right: 8vw;
-		display: flex;
-		align-items: center;
-		gap: 1.2rem;
+		top: 0.55rem;
+		left: 0.55rem;
+		padding: 0.3rem 0.55rem;
+		border-radius: 999px;
+		font-size: 0.62rem;
+		letter-spacing: 0.08em;
+		color: #fff;
+		background: rgba(18, 14, 12, 0.55);
+		backdrop-filter: blur(6px);
 	}
-	.count {
-		font-size: 0.9rem;
-		letter-spacing: 0.2em;
+	.tile-brand {
+		display: block;
+		margin-top: 1rem;
+		font-size: 0.74rem;
+		letter-spacing: 0.06em;
 		color: var(--color-gold);
 	}
-	.muted {
-		color: color-mix(in srgb, var(--color-ivory) 30%, transparent);
+	.tile-title {
+		display: -webkit-box;
+		margin-top: 0.35rem;
+		overflow: hidden;
+		font-size: 1.12rem;
+		line-height: 1.25;
+		color: color-mix(in srgb, var(--color-ivory) 88%, transparent);
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		transition: color 0.5s var(--ease-silk);
 	}
-	.bar {
-		position: relative;
-		flex: 1;
-		height: 1px;
-		background: color-mix(in srgb, var(--color-ivory) 16%, transparent);
-	}
-	.bar span {
-		position: absolute;
-		inset: 0;
-		transform-origin: left;
-		background: var(--color-gold);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.cone {
-			animation: none;
-		}
+	.tile:hover .tile-title {
+		color: var(--color-ivory);
 	}
 </style>

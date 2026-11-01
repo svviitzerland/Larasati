@@ -1,27 +1,33 @@
 /**
  * Semua isi situs ada di file ini, jadi cukup ubah teks dan foto di sini.
  *
- * Isinya disusun dari profil resmi Larasati. Angka angka yang dipakai juga
- * diambil apa adanya dari sana, bukan karangan, supaya tetap bisa
- * dipertanggungjawabkan kalau ada yang bertanya.
+ * Isinya disusun dari profil resmi Larasati dan unggahan aslinya. Jangan
+ * menambah angka, klien, atau testimoni yang tidak benar benar ada.
  *
  * Sampul galeri disimpan di `static/gallery/` lalu ditulis sebagai
  * `/gallery/nama-berkas.webp` pada properti `cover`.
  */
+
+/**
+ * Alamat situs yang sudah tayang, tanpa garis miring di akhir. Wajib diisi
+ * supaya gambar pratinjau tautan (og:image) muncul di WhatsApp, LinkedIn,
+ * dan media sosial lain, karena mereka hanya membaca alamat lengkap.
+ */
+export const siteUrl = '';
 
 export const profile = {
 	name: 'Larasati Putri Maharani',
 	shortName: 'Larasati',
 	/** dipakai sebagai monogram di navigasi */
 	initials: 'Laras',
-	role: 'Mahasiswa Teknologi Informasi dan Master of Ceremony',
+	role: 'MC, Voice Over and Model in Bandung',
 	location: 'Bandung, Jawa Barat',
+	/** kalimat pembuka bagian Tentang */
 	intro:
-		'Saya belajar Teknologi Informasi di Telkom University, mengajar algoritma pemrograman sebagai asisten dosen, dan berdiri di depan mikrofon ketika himpunan punya acara. Ketiganya menuntut hal yang sama, persiapan yang rapi dan kemampuan membaca ruangan.',
+		"Hi 👋 I'm Laras, an MC, voice over artist and on-camera talent based in Bandung. You may have heard my voice on @infobdgcom reels, or seen me hosting events around campus.",
 	bio: [
-		'Sejak Januari 2025 saya menjadi asisten dosen Algoritma Pemrograman di Universitas Telkom, mendampingi lebih dari empat puluh mahasiswa setiap semester. Sebelumnya saya asisten praktikum untuk mata kuliah yang sama, menemani mereka membedah logika dan menelusuri kesalahan kode baris demi baris.',
-		'Di Himpunan Mahasiswa Teknologi Informasi saya bekerja di Divisi Hubungan Masyarakat. Dari sana saya memimpin program Bina Desa yang melibatkan sekitar seratus lima puluh peserta, menjadi Sekretaris I kaderisasi PROXIMITI untuk dua ratus mahasiswa, dan membawakan sekitar lima acara resmi sebagai pembawa acara.',
-		'Kebiasaan berdiri di depan orang banyak sudah dimulai jauh sebelum kuliah, dari Ketua OSIS di SMKN 1 Abang sampai Forum Genre Provinsi Bali. Latar multimedia dan pengalaman sebagai desainer grafis membuat saya terbiasa memikirkan dua hal sekaligus, isi acaranya dan bagaimana ia terlihat.'
+		'I study Information Technology at Telkom University, where I also work as a teaching assistant for Programming Algorithms. Outside of class, I host events, voice brand content and appear on camera for promotional work.',
+		"I've been at home in front of a crowd since my time as student council president at SMKN 1 Abang in Bali. At university I joined the public relations team of the IT student association, led its Bina Desa community programme of around 150 participants, and hosted five of its official events."
 	],
 	email: 'larasati.puan@gmail.com',
 	socials: [
@@ -31,154 +37,21 @@ export const profile = {
 	]
 };
 
-export const stats = [
-	{ value: 40, suffix: '+', label: 'Mahasiswa dibimbing tiap semester' },
-	{ value: 200, suffix: '', label: 'Peserta kaderisasi PROXIMITI' },
-	{ value: 150, suffix: '', label: 'Peserta program Bina Desa' },
-	{ value: 5, suffix: '', label: 'Acara resmi dibawakan' }
-];
-
-export const tickerWords = [
-	'Master of Ceremony',
-	'Voice Over',
-	'Model',
-	'Asisten Dosen',
-	'Algoritma Pemrograman',
-	'Java',
-	'Public Relations',
-	'Pengembangan Web',
-	'Desain Grafis',
-	'Public Speaking'
-];
-
-/** Dua sisi profesi yang ditampilkan berdampingan. */
-export const facets = [
+/** Hal yang bisa dikerjakan bersama, tampil sebagai daftar di bagian Tentang. */
+export const services = [
 	{
-		no: '01',
-		title: 'Di Balik Layar',
-		subtitle: 'Teknologi',
-		text: 'Mengajarkan logika pemrograman kepada mahasiswa, menelusuri kesalahan kode bersama mereka, dan menilai hasil praktikum. Di luar kelas, saya belajar pengembangan web dan sistem tertanam.',
-		skills: [
-			'Java',
-			'Algoritma dan Struktur Data',
-			'Pengembangan Web',
-			'Sistem Tertanam',
-			'Desain Grafis',
-			'Multimedia'
-		]
+		name: 'Master of Ceremony',
+		text: 'Seminars, campus events and formal ceremonies. I work through the run-down with the organising team and keep the room with me from the opening to the final word.'
 	},
 	{
-		no: '02',
-		title: 'Di Atas Panggung',
-		subtitle: 'Panggung dan Suara',
-		text: 'Membawakan acara resmi himpunan, memimpin program pengabdian di desa, dan mengurus kaderisasi ratusan mahasiswa baru. Semuanya berawal dari satu kebiasaan, berani memegang mikrofon.',
-		skills: [
-			'Master of Ceremony',
-			'Voice Over',
-			'Model',
-			'Public Speaking',
-			'Hubungan Masyarakat',
-			'Manajemen Acara'
-		]
+		name: 'Voice Over',
+		text: 'Narration for brand reels and local media, from food and fitness to a new airline route.'
+	},
+	{
+		name: 'Model',
+		text: 'On-camera talent for promotional content, including work for METRO, GrabFood and Melinda Aesthetic Center.'
 	}
 ];
-
-/**
- * Kumpulan kalimat untuk bagian sorot bergaya koran. Kalimat kalimat ini
- * diacak lalu diganti dengan tempo cepat sebagai latar, sementara nama
- * Laras di tengah layar tetap diam.
- */
-export const paperLines = [
-	'Empat puluh mahasiswa duduk menunggu sesi responsi dimulai pada sore itu.',
-	'Logika pemrograman dibedah pelan pelan sampai semua orang paham alurnya.',
-	'Kesalahan kode ditelusuri baris demi baris hingga penyebabnya ketemu.',
-	'Empat belas jurnal praktikum diperiksa satu per satu sebelum tenggat.',
-	'Seratus lima puluh peserta hadir dalam program Bina Desa di Pasir Endah.',
-	'Dua ratus mahasiswa baru dikawal melewati rangkaian kaderisasi.',
-	'Mikrofon dinyalakan, susunan acara dibaca ulang, lalu ruangan menyimak.',
-	'Rundown berubah di menit terakhir dan tidak ada tamu yang menyadarinya.',
-	'Divisi hubungan masyarakat menyiapkan setiap detail acara resmi himpunan.',
-	'Antarmuka yang rapi lahir dari persiapan yang sama telitinya dengan rundown.',
-	'Java dipakai untuk menjelaskan konsep yang tadinya terasa berat.',
-	'Desain poster dikerjakan malam hari, presentasi dibawakan keesokan paginya.',
-	'Ketua OSIS belajar berbicara di depan ratusan siswa sejak bangku sekolah.',
-	'Forum Genre mengajarkan cara menyampaikan pesan agar benar benar sampai.',
-	'Sistem tertanam dipelajari bersama teman teman satu kelompok studi.',
-	'Kesan pertama dibangun dalam tiga puluh detik yang pertama.',
-	'Setiap ruangan punya karakter sendiri dan harus dibaca lebih dulu.',
-	'Pembukaan yang ringkas ternyata lebih diingat daripada sambutan panjang.',
-	'Bandung menjadi tempat semua kebiasaan itu bertemu dalam satu jadwal.',
-	'Acara berjalan sesuai rencana karena setiap kemungkinan sudah disiapkan.'
-];
-
-/** Kalimat pendek berhuruf judul, dipakai untuk baris tajuk. */
-export const paperHeads = [
-	'Rundown Berubah di Menit Terakhir',
-	'Empat Puluh Mahasiswa Menunggu Responsi',
-	'Mikrofon Dinyalakan, Ruangan Menyimak',
-	'Bina Desa Menutup Pekan dengan Sorak',
-	'Dua Ratus Nama Baru Masuk Daftar Hadir',
-	'Logika Dibedah Sampai Semua Paham',
-	'Kesan Pertama Dibangun Tiga Puluh Detik',
-	'Panggung Kecil di Ujung Ruang Kuliah',
-	'Suara yang Sampai ke Baris Paling Belakang',
-	'Persiapan Rapi Menyelamatkan Satu Acara'
-];
-
-/** Lema untuk halaman indeks, disusul titik titik dan nomor halaman. */
-export const paperEntries = [
-	'Algoritma Pemrograman',
-	'Bina Desa, Pasir Endah',
-	'Kaderisasi PROXIMITI',
-	'Forum Genre Bali',
-	'Hubungan Masyarakat',
-	'Informatics Laboratory',
-	'Master of Ceremony',
-	'Sistem Tertanam',
-	'Voice Over',
-	'Desain Grafis',
-	'PKKMB Megabit',
-	'Ketua OSIS'
-];
-
-/** Bentuk cetakan tempat namanya bisa muncul. */
-export type PaperKind = 'berita' | 'judul' | 'indeks' | 'takarir';
-
-/**
- * Kalimat yang memuat nama Laras, dikelompokkan menurut bentuk cetakannya.
- * Halaman boleh berganti rupa sesuka hati, dari berita ke indeks ke takarir,
- * tetapi namanya selalu jatuh di titik tengah layar.
- *
- * Syaratnya satu, tiap kalimat harus memuat kata Laras persis sekali dan
- * berdiri sendiri, sebab kata itulah yang ditukar dengan nama lengkapnya.
- */
-export const paperNameLines: Record<PaperKind, string[]> = {
-	berita: [
-		'Empat puluh mahasiswa tiap semester belajar algoritma bersama Laras di kelas responsi.',
-		'Himpunan menyerahkan mikrofon kepada Laras ketika acara resmi harus dibuka.',
-		'Program Bina Desa dengan seratus lima puluh peserta dipimpin oleh Laras sebagai ketua.',
-		'Dua ratus mahasiswa baru dikawal Laras melewati rangkaian kaderisasi PROXIMITI.',
-		'Di daftar asisten dosen Algoritma Pemrograman, nama Laras sudah tercatat sejak 2025.'
-	],
-	judul: [
-		'Mikrofon Diserahkan kepada Laras Ketika Acara Dibuka',
-		'Laras Memimpin Bina Desa di Pasir Endah',
-		'Dua Ratus Mahasiswa Baru Dikawal Laras',
-		'Laras Tercatat sebagai Asisten Dosen Sejak 2025'
-	],
-	indeks: [
-		'Laras · pembawa acara · hal. 214',
-		'Laras · asisten dosen · hal. 87',
-		'Laras · pengisi suara · hal. 132',
-		'Laras · hubungan masyarakat · hal. 45'
-	],
-	takarir: [
-		'Foto: Laras memimpin Bina Desa di Pasir Endah, 2025',
-		'Dokumentasi: Laras membawakan acara resmi himpunan',
-		'Arsip 2026 · HMTI · Laras, Divisi Hubungan Masyarakat',
-		'Takarir: Laras di ruang praktikum Informatics Laboratory'
-	]
-};
 
 /** Tiga peran yang dikerjakan di depan panggung, mikrofon, dan kamera. */
 export type Craft = 'Master of Ceremony' | 'Voice Over' | 'Model';
@@ -216,128 +89,161 @@ export type GalleryItem = {
  */
 export const gallery: GalleryItem[] = [
 	{
-		id: 'r6',
+		id: 'r7',
 		no: 'I',
+		code: 'DfGsQL2hu7H',
+		title: 'METRO One Day Super Special',
+		roles: ['Model', 'Voice Over'],
+		brand: 'METRO Department Store',
+		account: '@infobdgcom',
+		date: 'October 2026',
+		topic: 'Retail and promotions',
+		note: "Hosting METRO's one-day sale at Trans Studio Mall: up to 50% off, plus an extra 20% with Bank Mega and Allo PayLater.",
+		cover: '/gallery/reel-07.webp'
+	},
+	{
+		id: 'r6',
+		no: 'II',
 		code: 'DdOgwIVz71Z',
-		title: 'Makanan Viral Bandung dan Diskon Puas GrabFood',
-		roles: ['Voice Over'],
+		title: "Bandung's Viral Food and GrabFood's Diskon Puas",
+		roles: ['Model', 'Voice Over'],
 		brand: 'GrabFood',
 		account: '@infobdgcom',
 		date: '13 September 2026',
-		topic: 'Kuliner dan layanan pesan antar',
-		note: 'Mengisi narasi soal makanan viral Bandung yang antreannya panjang, lalu mengajak kembali ke comfort food lewat promo Diskon Puas No Limit dari GrabFood.',
+		topic: 'Food and delivery',
+		note: "A story every Bandung student renting a room knows: tired of queuing for the latest viral dish, she goes back to comfort food with GrabFood's Diskon Puas No Limit deal.",
 		cover: '/gallery/reel-06.webp'
 	},
 	{
 		id: 'r5',
-		no: 'II',
+		no: 'III',
 		code: 'DcxjYBwPr1f',
-		title: 'Road to Ionation 7th, Workout dan Wellness',
+		title: 'Road to Ionation 7th: Workout and Wellness',
 		roles: ['Voice Over'],
 		brand: 'Ion Water by Pocari Sweat',
 		account: '@infobdgcom',
 		date: '2 September 2026',
-		topic: 'Olahraga dan kebugaran',
-		note: 'Mengisi narasi sesi olahraga bersama di Setiabudhi Social Club Bandung, rangkaian menuju festival kebugaran Ionation ketujuh.',
+		topic: 'Sport and wellness',
+		note: 'Narration for a group workout at Setiabudhi Social Club Bandung, part of the lead-up to the seventh Ionation fitness festival.',
 		cover: '/gallery/reel-05.webp'
 	},
 	{
 		id: 'r4',
-		no: 'III',
+		no: 'IV',
 		code: 'DcLjH4APliX',
-		title: 'Medikacom Carnaval, Kreativitas Tanpa Batas',
+		title: 'Medikacom Carnaval: Creativity Without Limits',
 		roles: ['Voice Over'],
 		brand: 'SMK Medikacom',
 		account: '@infobdgcom',
-		date: '18 Agustus 2026',
-		topic: 'Pendidikan dan acara sekolah',
-		note: 'Mengisi narasi liputan karnaval sekolah, dari busana daerah dan kendaraan hias sampai kekompakan peserta di sepanjang jalan.',
+		date: '18 August 2026',
+		topic: 'Education and school events',
+		note: 'Narration for a school carnival, from traditional dress and decorated floats to a parade that stayed in step the whole way.',
 		cover: '/gallery/reel-04.webp'
 	},
 	{
 		id: 'r3',
-		no: 'IV',
+		no: 'V',
 		code: 'Db41xWjPf8K',
-		title: 'Eiger Women Flagship Store Buka di Bandung',
+		title: 'Eiger Women Flagship Store Opens in Bandung',
 		roles: ['Voice Over'],
 		brand: 'Eiger',
 		account: '@infobdgcom',
-		date: '11 Agustus 2026',
-		topic: 'Peritel dan gaya hidup luar ruang',
-		note: 'Meliput pembukaan gerai utama Eiger Women di Jalan Sumatra, berkeliling dari rak perlengkapan sampai layanan garansi seumur hidup.',
+		date: '11 August 2026',
+		topic: 'Retail and outdoor lifestyle',
+		note: "Covering the opening of Eiger Women's flagship store on Jalan Sumatra, from the gear on the shelves to its lifetime warranty.",
 		cover: '/gallery/reel-03.webp'
 	},
 	{
 		id: 'r2',
-		no: 'V',
+		no: 'VI',
 		code: 'DbnMTkfzvMC',
-		title: 'Bandung ke Denpasar Terbang Langsung',
+		title: 'Bandung to Denpasar, Non-Stop',
 		roles: ['Voice Over'],
 		brand: 'Garuda Indonesia',
 		account: '@infobdgcom',
-		date: '4 Agustus 2026',
-		topic: 'Penerbangan dan perjalanan',
-		note: 'Mengisi narasi kabar rute langsung Bandung menuju Denpasar lewat Bandara Husein Sastranegara, lengkap dengan gambaran layanan di dalam pesawat.',
+		date: '4 August 2026',
+		topic: 'Aviation and travel',
+		note: 'Narration announcing the new direct route from Husein Sastranegara Airport to Denpasar, with a look at the service on board.',
 		cover: '/gallery/reel-02.webp'
 	},
 	{
 		id: 'r1',
-		no: 'VI',
+		no: 'VII',
 		code: 'Dbfl901PIbp',
-		title: 'Destinasi Cantik Baru di Bandung',
+		title: 'A New Beauty Destination in Bandung',
 		roles: ['Model', 'Voice Over'],
 		brand: 'Melinda Aesthetic Center',
 		account: '@infobdgcom',
-		date: '1 Agustus 2026',
-		topic: 'Kecantikan dan perawatan kulit',
-		note: 'Menyusuri klinik kecantikan yang baru dibuka di Bandung, dari ruang konsultasi sampai teknologi perawatan yang ditawarkan.',
+		date: '1 August 2026',
+		topic: 'Beauty and skincare',
+		note: 'A walk through a newly opened aesthetic clinic in Bandung, from the consultation rooms to its treatment technology.',
 		cover: '/gallery/reel-01.webp'
 	}
 ];
 
+/**
+ * Logo brand untuk pita di bawah beranda. Berkasnya putih di atas latar
+ * transparan dan hanya dipakai sebagai topeng, jadi warnanya selalu
+ * mengikuti palet situs. `height` menyamakan bobot visual: logo yang
+ * memanjang dibuat lebih pendek daripada logo yang bertumpuk.
+ * `size` adalah tinggi tampil dalam rem, diatur manual per logo.
+ * Kuncinya harus sama persis dengan `brand` di galeri.
+ */
+export const brandLogos: Record<
+	string,
+	{ src: string; width: number; height: number; size: number }
+> = {
+	'METRO Department Store': { src: '/brands/metro.png', width: 499, height: 160, size: 2.0 },
+	GrabFood: { src: '/brands/grabfood.png', width: 840, height: 160, size: 1.6 },
+	'Ion Water by Pocari Sweat': { src: '/brands/ionwater.png', width: 176, height: 160, size: 3.1 },
+	'SMK Medikacom': { src: '/brands/medikacom.png', width: 691, height: 160, size: 1.85 },
+	Eiger: { src: '/brands/eiger.png', width: 196, height: 160, size: 2.3 },
+	'Garuda Indonesia': { src: '/brands/garuda.png', width: 816, height: 160, size: 2.3 }
+};
+
 export const timeline = [
 	{
-		year: '2025',
-		title: 'Asisten Dosen Algoritma Pemrograman',
-		text: 'Universitas Telkom. Membimbing lebih dari empat puluh mahasiswa tiap semester lewat kelas responsi, lalu menilai tugas dan hasil praktikum mereka.'
+		year: '2026',
+		title: 'Voice Over and On-Camera Talent, @infobdgcom',
+		text: 'Since August I have narrated and appeared in promotional reels for Bandung brands, including GrabFood, Garuda Indonesia, Eiger and METRO.'
 	},
 	{
 		year: '2025',
-		title: 'Divisi Hubungan Masyarakat HMTI',
-		text: 'Ketua pelaksana Bina Desa untuk seratus lima puluh peserta, Sekretaris I PROXIMITI untuk dua ratus mahasiswa, sekaligus pembawa acara di lima acara resmi.'
+		title: 'Teaching Assistant, Programming Algorithms',
+		text: 'Telkom University. I guide more than 40 students each semester through tutorial classes and grade their assignments and lab work.'
+	},
+	{
+		year: '2025',
+		title: 'Public Relations, IT Student Association',
+		text: 'Project lead for Bina Desa, first secretary of the PROXIMITI orientation for 200 new students, and MC for five official association events.'
 	},
 	{
 		year: '2024',
-		title: 'Asisten Praktikum dan Liaison Officer',
-		text: 'Mendampingi praktikum Algoritma Pemrograman di Informatics Laboratory, dan menjadi penghubung peserta pada PKKMB X Megabit 7.0.'
-	},
-	{
-		year: '2024',
-		title: 'Kelompok Studi Hardware and Embedded System',
-		text: 'Mendalami sistem tertanam bersama kelompok studi, melengkapi sisi perangkat keras dari ilmu yang dipelajari di kelas.'
+		title: 'Lab Assistant and Liaison Officer',
+		text: 'Supported Programming Algorithms lab sessions at the Informatics Laboratory and served as a liaison officer for the PKKMB X Megabit 7.0 orientation.'
 	},
 	{
 		year: '2023',
-		title: 'Mulai kuliah dan bergabung dengan GDSC',
-		text: 'Masuk Teknologi Informasi Telkom University, lalu mengikuti bootcamp pengembangan web di Google Developer Student Club.'
+		title: 'Started at Telkom University',
+		text: 'Began a degree in Information Technology, joined a web development bootcamp at Google Developer Student Club and the Hardware and Embedded Systems study group.'
 	},
 	{
 		year: '2022',
-		title: 'Ketua OSIS SMKN 1 Abang',
-		text: 'Memimpin organisasi siswa selama satu tahun setelah sebelumnya menjadi wakil ketua, sambil bekerja sebagai desainer grafis di Oka Print.'
+		title: 'Student Council President, SMKN 1 Abang',
+		text: 'Led the student council for a year after serving as vice president, while working as a graphic designer at Oka Print.'
 	},
 	{
 		year: '2021',
-		title: 'Forum Genre Bali dan PIK-R',
-		text: 'Mengurus komunikasi, informasi, dan edukasi untuk remaja di tingkat kabupaten dan provinsi selama dua tahun.'
+		title: 'Forum Genre Bali and PIK-R',
+		text: 'Two years running communication, information and education programmes for young people at district and provincial level.'
 	}
 ];
 
 /** Bagian halaman untuk navigasi dan penanda gulir. */
 export const sections = [
-	{ id: 'atas', label: 'Beranda' },
-	{ id: 'tentang', label: 'Tentang' },
-	{ id: 'galeri', label: 'Galeri' },
-	{ id: 'jejak', label: 'Pengalaman' },
-	{ id: 'kontak', label: 'Kontak' }
+	{ id: 'atas', label: 'Home' },
+	{ id: 'tentang', label: 'About' },
+	{ id: 'galeri', label: 'Work' },
+	{ id: 'jejak', label: 'Experience' },
+	{ id: 'kontak', label: 'Contact' }
 ];

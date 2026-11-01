@@ -56,7 +56,7 @@
 
 <header class:compact class:open class:dark={ui.dark}>
 	<div class="shell">
-		<button type="button" class="mark" onclick={() => glideTo(0)} aria-label="Kembali ke beranda">
+		<button type="button" class="mark" onclick={() => glideTo(0)} aria-label="Back to top">
 			<svg viewBox="0 0 44 44" aria-hidden="true">
 				<circle class="ring-track" cx="22" cy="22" r="19" />
 				<circle
@@ -100,9 +100,9 @@
 			class:on={atContact}
 			use:magnetic={0.2}
 			onclick={() => go('kontak')}
-			data-cursor="Sapa"
+			data-cursor="Hello"
 		>
-			<span>Ajak Kolaborasi</span>
+			<span>Get in Touch</span>
 			<span class="pip"></span>
 		</button>
 
@@ -111,7 +111,7 @@
 			class="burger"
 			onclick={() => (open = !open)}
 			aria-expanded={open}
-			aria-label={open ? 'Tutup menu' : 'Buka menu'}
+			aria-label={open ? 'Close menu' : 'Open menu'}
 		>
 			<span></span>
 			<span></span>
