@@ -31,7 +31,6 @@ export const profile = {
 	],
 	email: 'larasati.puan@gmail.com',
 	socials: [
-		{ label: 'Instagram', href: 'https://www.instagram.com/larasati.puan/' },
 		{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/larasatimaharani' },
 		{ label: 'GitHub', href: 'https://github.com/larasatiPuan' }
 	]

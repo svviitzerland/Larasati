@@ -20,8 +20,8 @@
 		</h2>
 
 		<p class="say reveal" use:reveal={{ delay: 220 }}>
-			For hosting, voice over or on-camera work, send me an email with the date, location and a
-			short brief. You can also reach me on Instagram.
+			I'm available for events, voice over and brand campaigns. Send me an email with the date, the
+			location and a few words about what you have in mind.
 		</p>
 
 		<a

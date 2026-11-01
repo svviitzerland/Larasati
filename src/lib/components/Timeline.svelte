@@ -106,20 +106,21 @@
 		background: var(--color-rose);
 	}
 
+	/* ruang untuk tahun ditaruh sebagai padding, bukan margin judul,
+	   supaya tidak bocor keluar dan ikut menggeser label tahunnya */
 	li {
 		position: relative;
-		padding-left: 2rem;
-		padding-bottom: 3.5rem;
+		padding: 1.9rem 0 3.5rem 2rem;
 	}
 	@media (min-width: 768px) {
 		li {
-			padding-left: 9rem;
+			padding: 0 0 3.5rem 9rem;
 		}
 	}
 
 	.node {
 		position: absolute;
-		top: 0.55rem;
+		top: 0.3rem;
 		left: 0;
 		width: 9px;
 		height: 9px;
@@ -134,7 +135,11 @@
 	}
 	@media (min-width: 768px) {
 		.node {
+			top: 0.55rem;
 			left: 6.5rem;
+		}
+		.year {
+			top: 0.4rem;
 		}
 	}
 	li:hover .node {
@@ -145,7 +150,7 @@
 
 	.year {
 		position: absolute;
-		top: 0.4rem;
+		top: 0.2rem;
 		left: 2rem;
 		color: var(--color-roseink);
 	}
@@ -156,15 +161,9 @@
 	}
 
 	li h3 {
-		margin-top: 1.8rem;
 		font-size: clamp(1.25rem, 2.6vw, 1.9rem);
 		line-height: 1.3;
 		transition: color 0.6s var(--ease-silk);
-	}
-	@media (min-width: 768px) {
-		li h3 {
-			margin-top: 0;
-		}
 	}
 	li:hover h3 {
 		color: var(--color-mocha);
