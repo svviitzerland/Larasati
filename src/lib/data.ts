@@ -13,7 +13,7 @@
  * supaya gambar pratinjau tautan (og:image) muncul di WhatsApp, LinkedIn,
  * dan media sosial lain, karena mereka hanya membaca alamat lengkap.
  */
-export const siteUrl = '';
+export const siteUrl = 'https://larasati.my.id';
 
 export const profile = {
 	name: 'Larasati Putri Maharani',
