@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { gallery, type Craft } from '$lib/data';
 	import { reveal } from '$lib/actions/reveal';
-	import { parallax } from '$lib/actions/motion';
 	import { onFrame } from '$lib/scroll.svelte';
 	import { openViewer } from '$lib/viewer.svelte';
-	import SectionHeading from './SectionHeading.svelte';
 
 	const [latest, ...rest] = gallery;
+	const restCount = String(rest.length).padStart(2, '0');
 
 	let section = $state<HTMLElement | null>(null);
 	let cover = $state<HTMLElement | null>(null);
+	let rail = $state<HTMLUListElement | null>(null);
 
 	// cahaya ruangan yang mengikuti kursor
 	let lightX = $state(50);
@@ -22,10 +22,6 @@
 		Model: 'Model'
 	};
 	const badge = (roles: Craft[]) => roles.map((role) => short[role]).join(' · ');
-
-	// tiap kolom tertinggal dengan laju berbeda, seperti foto yang
-	// digantung tidak rata di dinding
-	const drift = [10, 60, 25, 75, 35, 55];
 
 	/**
 	 * Satu momen gulir untuk karya terbaru. Sampulnya masuk sebagai lengkung
@@ -51,6 +47,11 @@
 		lightX = ((event.clientX - rect.left) / rect.width) * 100;
 		lightY = ((event.clientY - rect.top) / rect.height) * 100;
 	}
+
+	function scrollRail(direction: -1 | 1) {
+		if (!rail) return;
+		rail.scrollBy({ left: direction * rail.clientWidth * 0.72, behavior: 'smooth' });
+	}
 </script>
 
 <!-- Tautan Instagram memang menuju ke luar situs. -->
@@ -75,10 +76,9 @@
 
 	<div class="inner">
 		<header class="head">
-			<SectionHeading title="Recent" italic="work." tone="dark" />
-			<p class="say reveal" use:reveal={{ delay: 160 }}>
-				Most of these aired on {latest.account}. Choose a cover to watch the reel right here.
-			</p>
+			<h2 class="work-heading reveal font-display" use:reveal={{ y: '12px', blur: 0 }}>
+				<span>Recent</span><span class="work-italic">work.</span>
+			</h2>
 		</header>
 
 		<!-- karya terbaru tampil paling besar -->
@@ -99,7 +99,7 @@
 
 			<div class="feature-info">
 				<h3 class="feature-title reveal font-display" use:reveal={{ delay: 80 }}>
-					{latest.title}
+					{latest.title.replaceAll('-', '‑')}
 				</h3>
 				<p class="feature-brand reveal" use:reveal={{ delay: 140 }}>
 					{latest.brand} <span>· {latest.date}</span>
@@ -129,10 +129,35 @@
 
 		<!-- sisanya berderet, tetap dengan nama brand dan perannya -->
 		<div class="more">
-			<p class="more-title reveal font-display" use:reveal={{ y: '12px', blur: 0 }}>More work</p>
-			<ul class="grid" tabindex="0" aria-label="More work, scroll horizontally">
+			<div class="more-head">
+				<p class="more-title reveal font-display" use:reveal={{ y: '12px', blur: 0 }}>More reels</p>
+				<div class="more-controls">
+					<p class="more-hint reveal" use:reveal={{ y: '12px', blur: 0 }}>
+						{restCount} reels
+					</p>
+					<div class="rail-controls" role="group" aria-label="Browse reels">
+						<button
+							type="button"
+							class="rail-arrow"
+							aria-label="Previous reels"
+							onclick={() => scrollRail(-1)}
+						>
+							<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.5-5 5.5 5 5.5" /></svg>
+						</button>
+						<button
+							type="button"
+							class="rail-arrow"
+							aria-label="Next reels"
+							onclick={() => scrollRail(1)}
+						>
+							<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 4.5 5 5.5-5 5.5" /></svg>
+						</button>
+					</div>
+				</div>
+			</div>
+			<ul bind:this={rail} class="grid" aria-label="More reels">
 				{#each rest as item, i (item.id)}
-					<li use:parallax={{ speed: drift[i % drift.length] }}>
+					<li>
 						<button
 							type="button"
 							class="tile reveal"
@@ -158,7 +183,7 @@
 
 <style>
 	.hall {
-		--portal: clamp(12rem, 30vh, 18rem);
+		--portal: clamp(9rem, 22vh, 14rem);
 		position: relative;
 		overflow: hidden;
 		background: var(--color-noir);
@@ -245,7 +270,7 @@
 		position: relative;
 		max-width: 1300px;
 		margin-inline: auto;
-		padding: calc(var(--portal) + 2rem) 1.5rem calc(var(--portal) + 3rem);
+		padding: calc(var(--portal) + 1.5rem) 1.5rem calc(var(--portal) + 2rem);
 	}
 	@media (min-width: 768px) {
 		.inner {
@@ -254,28 +279,60 @@
 	}
 
 	.head {
-		max-width: 40rem;
+		max-width: 1100px;
+		margin-inline: auto;
+		text-align: center;
 	}
-	.say {
-		margin-top: 1.6rem;
-		max-width: 30rem;
-		font-size: 0.98rem;
-		line-height: 1.85;
-		color: color-mix(in srgb, var(--color-ivory) 66%, transparent);
+	.head::after {
+		content: '';
+		display: block;
+		width: 3rem;
+		height: 1px;
+		margin: 1.05rem auto 0;
+		background: color-mix(in srgb, var(--color-gold) 75%, transparent);
+	}
+	.work-heading {
+		display: flex;
+		justify-content: center;
+		align-items: baseline;
+		gap: 0.2em;
+		font-size: clamp(3rem, 6.5vw, 5.5rem);
+		font-weight: 300;
+		line-height: 1;
+		letter-spacing: -0.02em;
+		color: var(--color-ivory);
+		white-space: nowrap;
+	}
+	.work-italic {
+		color: var(--color-gold);
+		font-style: italic;
 	}
 
 	/* --- karya terbaru --- */
 	.feature {
+		position: relative;
 		display: grid;
-		gap: 2.6rem;
-		margin-top: 4.5rem;
+		gap: 2rem;
+		margin: 2.8rem auto 0;
 	}
 	@media (min-width: 900px) {
 		.feature {
-			grid-template-columns: auto minmax(0, 1fr);
+			max-width: 1100px;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 			align-items: center;
-			gap: 5rem;
-			margin-top: 5.5rem;
+			gap: 0;
+			margin-top: 3rem;
+		}
+		.feature::before {
+			position: absolute;
+			z-index: 1;
+			top: 50%;
+			left: 50%;
+			width: 1px;
+			height: 84%;
+			transform: translate(-50%, -50%);
+			background: color-mix(in srgb, var(--color-gold) 32%, transparent);
+			content: '';
 		}
 	}
 
@@ -283,7 +340,7 @@
 		--open: 0;
 		position: relative;
 		display: block;
-		width: min(100%, 22rem);
+		width: min(100%, 15rem);
 		aspect-ratio: 9 / 16;
 		margin-inline: auto;
 		overflow: hidden;
@@ -298,8 +355,8 @@
 	}
 	@media (min-width: 900px) {
 		.feature-cover {
-			width: auto;
-			height: min(76svh, 40rem);
+			width: min(100%, 17rem);
+			height: auto;
 			margin-inline: 0;
 		}
 	}
@@ -318,6 +375,13 @@
 	}
 	.feature-cover:hover img {
 		transform: scale(1.04);
+	}
+	.feature-info {
+		width: 100%;
+		max-width: 36rem;
+		margin-inline: auto;
+		padding-inline: clamp(1rem, 5vw, 1.5rem);
+		text-align: center;
 	}
 	.shade {
 		position: absolute;
@@ -348,15 +412,16 @@
 		box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-gold) 22%, transparent);
 	}
 	.feature-title {
-		max-width: 16ch;
-		font-size: clamp(2.2rem, 4.6vw, 3.8rem);
+		max-width: 24ch;
+		margin-inline: auto;
+		font-size: clamp(2rem, 3.8vw, 3.3rem);
 		line-height: 1.04;
 		font-weight: 300;
 		text-wrap: balance;
 	}
 	.feature-brand {
-		margin-top: 1.2rem;
-		font-size: 1rem;
+		margin-top: 0.9rem;
+		font-size: 0.92rem;
 		color: var(--color-ivory);
 	}
 	.feature-brand span {
@@ -364,9 +429,10 @@
 	}
 	.roles {
 		display: flex;
+		justify-content: center;
 		flex-wrap: wrap;
 		gap: 0.5rem;
-		margin-top: 1.4rem;
+		margin-top: 1.1rem;
 	}
 	.roles li {
 		padding: 0.4rem 0.9rem;
@@ -377,18 +443,20 @@
 		color: color-mix(in srgb, var(--color-ivory) 82%, transparent);
 	}
 	.feature-note {
-		margin-top: 1.6rem;
-		max-width: 32rem;
-		font-size: 0.98rem;
-		line-height: 1.85;
+		margin-top: 1.2rem;
+		margin-inline: auto;
+		max-width: 30rem;
+		font-size: 0.92rem;
+		line-height: 1.75;
 		color: color-mix(in srgb, var(--color-ivory) 66%, transparent);
 	}
 	.actions {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
 		align-items: center;
 		gap: 1.4rem;
-		margin-top: 2.2rem;
+		margin-top: 1.6rem;
 	}
 	.watch {
 		display: inline-flex;
@@ -417,6 +485,34 @@
 	}
 	.out:hover {
 		color: var(--color-ivory);
+	}
+	@media (min-width: 900px) {
+		.feature {
+			--feature-inset: clamp(2.75rem, 5vw, 4rem);
+		}
+		.feature .feature-cover {
+			width: min(100%, 17rem);
+			margin-left: 0;
+			margin-right: var(--feature-inset);
+			justify-self: end;
+		}
+		.feature .feature-info {
+			justify-self: start;
+			width: calc(100% - var(--feature-inset));
+			max-width: 36rem;
+			margin-left: var(--feature-inset);
+			margin-right: 0;
+			padding-inline: 0;
+			text-align: left;
+		}
+		.feature .feature-title,
+		.feature .feature-note {
+			margin-inline: 0;
+		}
+		.feature .roles,
+		.feature .actions {
+			justify-content: flex-start;
+		}
 	}
 
 	/* --- tombol putar, digambar dengan CSS --- */
@@ -481,38 +577,92 @@
 
 	/* --- deretan karya lainnya --- */
 	.more {
-		margin-top: 7rem;
+		max-width: 1100px;
+		margin: 4.5rem auto 0;
+	}
+	.more-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
 	}
 	.more-title {
-		font-size: clamp(1.5rem, 2.6vw, 2rem);
+		font-size: clamp(1.4rem, 2.2vw, 1.8rem);
 		font-style: italic;
 		font-weight: 300;
 		color: color-mix(in srgb, var(--color-ivory) 70%, transparent);
 	}
+	.more-hint {
+		font-size: 0.68rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--color-ivory) 48%, transparent);
+	}
+	.more-controls,
+	.rail-controls {
+		display: flex;
+		align-items: center;
+	}
+	.more-controls {
+		gap: 1rem;
+	}
+	.rail-controls {
+		gap: 0.45rem;
+	}
+	.rail-arrow {
+		display: grid;
+		width: 2.25rem;
+		height: 2.25rem;
+		place-items: center;
+		border: 1px solid color-mix(in srgb, var(--color-gold) 38%, transparent);
+		border-radius: 50%;
+		color: color-mix(in srgb, var(--color-ivory) 78%, transparent);
+		transition:
+			background-color 0.35s var(--ease-silk),
+			border-color 0.35s var(--ease-silk),
+			color 0.35s var(--ease-silk),
+			transform 0.35s var(--ease-silk);
+	}
+	.rail-arrow:hover {
+		transform: translateY(-1px);
+		border-color: var(--color-gold);
+		background: color-mix(in srgb, var(--color-gold) 16%, transparent);
+		color: var(--color-ivory);
+	}
+	.rail-arrow svg {
+		width: 1rem;
+		height: 1rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
 	.grid {
 		display: grid;
 		grid-auto-flow: column;
-		grid-auto-columns: min(78vw, 19rem);
+		grid-auto-columns: min(55vw, 12.5rem);
 		grid-template-rows: minmax(0, 1fr);
 		gap: 1rem;
-		margin-top: 2.4rem;
+		margin-top: 1.5rem;
+		padding-bottom: 1.2rem;
 		overflow-x: auto;
 		overflow-y: hidden;
 		overscroll-behavior-inline: contain;
 		scroll-snap-type: x mandatory;
+		scroll-padding-inline: 0.25rem;
 		scrollbar-color: color-mix(in srgb, var(--color-gold) 55%, transparent) transparent;
 		scrollbar-width: thin;
 	}
 	@media (min-width: 700px) {
 		.grid {
-			grid-auto-columns: clamp(14rem, 17vw, 18rem);
-			gap: 1.6rem;
+			grid-auto-columns: clamp(10.5rem, 12.5vw, 12.5rem);
+			gap: 1.35rem;
 		}
 	}
 	@media (min-width: 1200px) {
 		.grid {
-			gap: 1.4rem;
-			padding-bottom: 1.5rem;
+			gap: 1.5rem;
 		}
 	}
 	.grid::-webkit-scrollbar {
@@ -590,8 +740,8 @@
 		display: -webkit-box;
 		margin-top: 0.35rem;
 		overflow: hidden;
-		font-size: 1.12rem;
-		line-height: 1.25;
+		font-size: 1.02rem;
+		line-height: 1.3;
 		color: color-mix(in srgb, var(--color-ivory) 88%, transparent);
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;

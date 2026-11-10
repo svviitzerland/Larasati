@@ -20,10 +20,6 @@
 	let markW = $state(0);
 	let markOn = $state(false);
 
-	// cincin progres mengelilingi monogram
-	const ring = 2 * Math.PI * 19;
-	const dash = $derived(ring * (1 - motion.progress));
-
 	// tautan mana yang sedang disorot atau sedang dibaca
 	const spot = $derived(
 		hover !== null ? hover : links.findIndex((link) => link.id === sections[ui.active]?.id)
@@ -57,18 +53,9 @@
 <header class:compact class:open class:dark={ui.dark}>
 	<div class="shell">
 		<button type="button" class="mark" onclick={() => glideTo(0)} aria-label="Back to top">
-			<svg viewBox="0 0 44 44" aria-hidden="true">
-				<circle class="ring-track" cx="22" cy="22" r="19" />
-				<circle
-					class="ring-live"
-					cx="22"
-					cy="22"
-					r="19"
-					stroke-dasharray={ring}
-					stroke-dashoffset={dash}
-				/>
-			</svg>
-			<span class="mono font-display">{profile.initials}</span>
+			<span class="mono font-display" style:--progress="{motion.progress * 100}%">
+				{profile.initials}
+			</span>
 		</button>
 
 		<nav bind:this={list} class="links" onpointerleave={() => (hover = null)}>
@@ -181,46 +168,34 @@
 		border-color: color-mix(in srgb, var(--color-gold) 22%, transparent);
 	}
 
-	/* --- monogram dengan cincin progres --- */
+	/* --- wordmark yang terisi mengikuti posisi gulir --- */
 	.mark {
-		position: relative;
-		display: grid;
-		place-items: center;
+		display: inline-flex;
+		align-items: center;
 		justify-self: start;
-		width: 3.5rem;
-		height: 3.5rem;
-	}
-	.mark svg {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		transform: rotate(-90deg);
-		overflow: visible;
-	}
-	.ring-track,
-	.ring-live {
-		fill: none;
-		stroke-width: 1;
-	}
-	.ring-track {
-		stroke: color-mix(in srgb, currentColor 22%, transparent);
-	}
-	.ring-live {
-		stroke: var(--color-rose);
-		transition: stroke 0.7s var(--ease-silk);
-	}
-	header.dark .ring-live {
-		stroke: var(--color-gold);
+		padding: 0.55rem 0.8rem;
+		border-radius: 999px;
 	}
 	.mono {
-		font-size: 0.78rem;
-		letter-spacing: 0.02em;
-		opacity: 0.75;
-		transition: opacity 0.6s var(--ease-silk);
+		--progress-color: var(--color-roseink);
+		--wordmark-base: color-mix(in srgb, currentColor 62%, transparent);
+		font-size: 1.45rem;
+		font-style: italic;
+		font-weight: 600;
+		letter-spacing: -0.035em;
+		background: linear-gradient(
+			90deg,
+			var(--progress-color) 0%,
+			var(--progress-color) var(--progress),
+			var(--wordmark-base) var(--progress),
+			var(--wordmark-base) 100%
+		);
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
 	}
-	.mark:hover .mono {
-		opacity: 1;
+	header.dark .mono {
+		--progress-color: var(--color-gold);
 	}
 
 	/* --- tautan dengan penanda yang meluncur --- */

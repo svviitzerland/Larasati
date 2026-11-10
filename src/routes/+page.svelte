@@ -13,7 +13,7 @@
 	import Lightbox from '$lib/components/Lightbox.svelte';
 	import Seam from '$lib/components/Seam.svelte';
 
-	const description = `Portfolio of ${profile.name}, an MC, voice over artist and model based in Bandung. Watch her published reels and get in touch for bookings.`;
+	const description = `${profile.name} is an MC, voice over artist and model based in Bandung. Explore her recent work and get in touch.`;
 
 	const ogImage = `${siteUrl}/og.jpg`;
 
@@ -22,7 +22,7 @@
 </script>
 
 <svelte:head>
-	<title>{profile.name}, {profile.role}</title>
+	<title>{profile.name}</title>
 	<meta name="description" content={description} />
 	<meta property="og:title" content={profile.name} />
 	<meta property="og:description" content={description} />

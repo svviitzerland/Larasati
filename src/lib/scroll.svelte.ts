@@ -66,7 +66,7 @@ let locked = false;
 let lockedY = 0;
 
 /** Meluncur ke posisi tertentu, dipakai untuk tautan navigasi. */
-export function glideTo(y: number, duration = 1200) {
+export function glideTo(y: number, duration = 700) {
 	const limit = Math.max(frame.docHeight - frame.viewportH, 0);
 	glide = { from: window.scrollY, to: clamp(y, 0, limit), start: performance.now(), duration };
 }
@@ -99,15 +99,19 @@ export function startScroll(content: HTMLElement, spacer: HTMLElement) {
 	const loop = (now: number) => {
 		const delta = Math.min((now - last) / 1000, 0.064);
 		last = now;
+		const navigating = glide !== null;
 
 		if (glide) {
 			const t = clamp((now - glide.start) / glide.duration, 0, 1);
-			window.scrollTo(0, glide.from + (glide.to - glide.from) * easeInOut(t));
+			// Mesin ini mengatur easing sendiri. Menulis ke scrollTop menghindari
+			// `scroll-behavior: smooth` browser yang akan menganimasikan ulang
+			// setiap langkah dan membuat tautan navigasi terasa macet.
+			document.documentElement.scrollTop = glide.from + (glide.to - glide.from) * easeInOut(t);
 			if (t >= 1) glide = null;
 		}
 
 		const target = locked ? lockedY : window.scrollY;
-		const ease = reduced ? 1 : 1 - Math.pow(0.00008, delta);
+		const ease = reduced || navigating ? 1 : 1 - Math.pow(0.00008, delta);
 		const previous = frame.y;
 
 		frame.y += (target - frame.y) * ease;

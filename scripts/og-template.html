@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=1200, initial-scale=1" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			html,
+			body {
+				width: 1200px;
+				height: 630px;
+				margin: 0;
+				overflow: hidden;
+			}
+			body {
+				position: relative;
+				color: #241d1b;
+				background:
+					radial-gradient(ellipse 58% 100% at 82% 17%, rgba(236, 214, 210, 0.52), transparent 72%),
+					radial-gradient(ellipse 52% 82% at 14% 76%, rgba(231, 219, 209, 0.48), transparent 72%),
+					radial-gradient(ellipse 42% 54% at 50% 48%, rgba(255, 253, 250, 0.88), transparent 76%),
+					#f8f2ed;
+				-webkit-font-smoothing: antialiased;
+			}
+			.stage {
+				position: absolute;
+				inset: 0 0 112px;
+				display: grid;
+				place-items: center;
+				overflow: hidden;
+			}
+			.gate {
+				position: absolute;
+				bottom: -80px;
+				left: 168px;
+				width: 864px;
+				height: 403px;
+				overflow: visible;
+			}
+			.gate path {
+				fill: none;
+				stroke: rgba(196, 141, 144, 0.45);
+				stroke-width: 1.1;
+				vector-effect: non-scaling-stroke;
+			}
+			.name {
+				position: relative;
+				z-index: 1;
+				margin: -5px 0 0;
+				text-align: center;
+				font:
+					300 152px/0.92 'Cormorant Garamond',
+					'Iowan Old Style',
+					Georgia,
+					'Times New Roman',
+					serif;
+				letter-spacing: -0.015em;
+			}
+			.first,
+			.last {
+				display: block;
+				white-space: nowrap;
+			}
+			.last {
+				color: #8d766c;
+				font-style: italic;
+			}
+			.brand-band {
+				position: absolute;
+				inset: auto 0 0;
+				display: flex;
+				align-items: center;
+				height: 112px;
+				padding: 0 68px;
+				border-top: 1px solid rgba(196, 141, 144, 0.42);
+				background: rgba(243, 236, 229, 0.92);
+			}
+			.band-label {
+				flex: 0 0 190px;
+				color: #8d766c;
+				font:
+					500 10px/1.4 'Inter',
+					Arial,
+					sans-serif;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+			}
+			.logos {
+				display: grid;
+				grid-template-columns: repeat(var(--count), 1fr);
+				align-items: center;
+				flex: 1;
+				height: 50px;
+			}
+			.item {
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 50px;
+			}
+			.item + .item::before {
+				position: absolute;
+				left: 0;
+				width: 1px;
+				height: 24px;
+				background: rgba(141, 118, 108, 0.2);
+				content: '';
+			}
+			.logo {
+				display: block;
+				width: var(--logo-width);
+				height: var(--logo-height);
+				background: #8d766c;
+				opacity: 0.94;
+				mask: var(--src) center / contain no-repeat;
+				-webkit-mask: var(--src) center / contain no-repeat;
+			}
+		</style>
+	</head>
+	<body>
+		<main class="stage">
+			<svg
+				class="gate"
+				viewBox="0 0 400 520"
+				fill="none"
+				aria-hidden="true"
+				preserveAspectRatio="xMidYMax meet"
+			>
+				<path d="M18 520 V214 A182 182 0 0 1 382 214 V520" />
+			</svg>
+			<h1 class="name">
+				<span class="first">{{FIRST_NAME}}</span><span class="last">{{LAST_NAME}}</span>
+			</h1>
+		</main>
+		<footer class="brand-band">
+			<div class="band-label">Selected<br />Collaborations</div>
+			<div class="logos" style="--count: {{BRAND_COUNT}}">{{BRAND_LOGOS}}</div>
+		</footer>
+	</body>
+</html>
