@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=1200, initial-scale=1" />
+		<meta name="viewport" content="width={{WIDTH}}, initial-scale=1" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -15,8 +15,8 @@
 			}
 			html,
 			body {
-				width: 1200px;
-				height: 630px;
+			width: {{WIDTH}}px;
+			height: {{HEIGHT}}px;
 				margin: 0;
 				overflow: hidden;
 			}
@@ -32,17 +32,17 @@
 			}
 			.stage {
 				position: absolute;
-				inset: 0 0 112px;
+				inset: 0 0 {{BAND_HEIGHT}}px;
 				display: grid;
 				place-items: center;
 				overflow: hidden;
 			}
 			.gate {
 				position: absolute;
-				bottom: -80px;
-				left: 168px;
-				width: 864px;
-				height: 403px;
+				bottom: {{GATE_BOTTOM}}px;
+				left: {{GATE_LEFT}}px;
+				width: {{GATE_WIDTH}}px;
+				height: {{GATE_HEIGHT}}px;
 				overflow: visible;
 			}
 			.gate path {
@@ -57,7 +57,7 @@
 				margin: -5px 0 0;
 				text-align: center;
 				font:
-					300 152px/0.92 'Cormorant Garamond',
+					300 {{NAME_SIZE}}px/0.92 'Cormorant Garamond',
 					'Iowan Old Style',
 					Georgia,
 					'Times New Roman',
@@ -78,7 +78,7 @@
 				inset: auto 0 0;
 				display: flex;
 				align-items: center;
-				height: 112px;
+				height: {{BAND_HEIGHT}}px;
 				padding: 0 68px;
 				border-top: 1px solid rgba(196, 141, 144, 0.42);
 				background: rgba(243, 236, 229, 0.92);

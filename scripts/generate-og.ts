@@ -1,8 +1,8 @@
 /**
- * Regenerate `static/og.jpg` from `scripts/og-template.html`.
+ * Regenerate the site Open Graph image and GitHub social preview from one design.
  * Run with `bun run og`. Requires Chrome or Chromium and ImageMagick.
  */
-import { access, unlink } from 'node:fs/promises';
+import { access, mkdtemp, rm } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -11,9 +11,34 @@ import { brandLogos, gallery, profile } from '../src/lib/data.ts';
 
 const root = resolve(import.meta.dir, '..');
 const templatePath = join(import.meta.dir, 'og-template.html');
-const outputPath = join(root, 'static', 'og.jpg');
-const htmlPath = join(tmpdir(), `portfolio-og-${process.pid}.html`);
-const pngPath = join(tmpdir(), `portfolio-og-${process.pid}.png`);
+const renders = [
+	{
+		name: 'og',
+		width: 1200,
+		height: 630,
+		bandHeight: 112,
+		gateBottom: -80,
+		gateLeft: 168,
+		gateWidth: 864,
+		gateHeight: 403,
+		nameSize: 152,
+		outputPath: join(root, 'static', 'og.jpg'),
+		format: 'jpeg'
+	},
+	{
+		name: 'social',
+		width: 1280,
+		height: 640,
+		bandHeight: 114,
+		gateBottom: -82,
+		gateLeft: 180,
+		gateWidth: 920,
+		gateHeight: 410,
+		nameSize: 162,
+		outputPath: join(root, 'static', 'social-preview.png'),
+		format: 'png'
+	}
+] as const;
 
 function escapeHtml(value: string) {
 	return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
@@ -75,28 +100,48 @@ const logos = uniqueBrands
 const firstName = profile.shortName;
 const lastName = profile.name.slice(firstName.length).trim();
 const template = await Bun.file(templatePath).text();
-const html = template
-	.replace('{{FIRST_NAME}}', escapeHtml(firstName))
-	.replace('{{LAST_NAME}}', escapeHtml(lastName))
-	.replace('{{BRAND_COUNT}}', String(uniqueBrands.length))
-	.replace('{{BRAND_LOGOS}}', logos);
 
-await Bun.write(htmlPath, html);
+for (const render of renders) {
+	const tempDir = await mkdtemp(join(tmpdir(), `portfolio-${render.name}-${process.pid}-`));
+	const htmlPath = join(tempDir, 'preview.html');
+	const pngPath = join(tempDir, 'preview.png');
+	const html = template
+		.replaceAll('{{WIDTH}}', String(render.width))
+		.replaceAll('{{HEIGHT}}', String(render.height))
+		.replaceAll('{{BAND_HEIGHT}}', String(render.bandHeight))
+		.replaceAll('{{GATE_BOTTOM}}', String(render.gateBottom))
+		.replaceAll('{{GATE_LEFT}}', String(render.gateLeft))
+		.replaceAll('{{GATE_WIDTH}}', String(render.gateWidth))
+		.replaceAll('{{GATE_HEIGHT}}', String(render.gateHeight))
+		.replaceAll('{{NAME_SIZE}}', String(render.nameSize))
+		.replace('{{FIRST_NAME}}', escapeHtml(firstName))
+		.replace('{{LAST_NAME}}', escapeHtml(lastName))
+		.replace('{{BRAND_COUNT}}', String(uniqueBrands.length))
+		.replace('{{BRAND_LOGOS}}', logos);
 
-try {
-	await run(chrome, [
-		'--headless',
-		'--disable-gpu',
-		'--allow-file-access-from-files',
-		'--hide-scrollbars',
-		'--virtual-time-budget=6000',
-		'--window-size=1200,630',
-		`--screenshot=${pngPath}`,
-		pathToFileURL(htmlPath).href
-	]);
-	await run(magick, [pngPath, '-strip', '-sampling-factor', '4:2:0', '-quality', '92', outputPath]);
-	console.log(`Updated ${outputPath}`);
-} finally {
-	await unlink(htmlPath).catch(() => {});
-	await unlink(pngPath).catch(() => {});
+	await Bun.write(htmlPath, html);
+
+	try {
+		await run(chrome, [
+			'--headless=new',
+			'--disable-gpu',
+			'--no-sandbox',
+			'--no-first-run',
+			'--allow-file-access-from-files',
+			'--hide-scrollbars',
+			'--virtual-time-budget=6000',
+			`--user-data-dir=${join(tempDir, 'profile')}`,
+			`--window-size=${render.width},${render.height}`,
+			`--screenshot=${pngPath}`,
+			pathToFileURL(htmlPath).href
+		]);
+		const magickArgs =
+			render.format === 'jpeg'
+				? [pngPath, '-strip', '-sampling-factor', '4:2:0', '-quality', '92', render.outputPath]
+				: [pngPath, '-strip', render.outputPath];
+		await run(magick, magickArgs);
+		console.log(`Updated ${render.outputPath}`);
+	} finally {
+		await rm(tempDir, { recursive: true, force: true });
+	}
 }
