@@ -24,9 +24,9 @@ export const profile = {
 	location: 'Bandung, Jawa Barat',
 	/** kalimat pembuka bagian Tentang */
 	intro:
-		"Hi 👋 I'm Laras, an MC, voice over artist and on-camera talent based in Bandung. You may have heard my voice on @infobdgcom reels, or seen me hosting events around campus.",
+		"Hi 👋 I'm Laras, an MC, voice over artist and model based in Bandung. You may have heard my voice on @infobdgcom reels, or seen me hosting events around campus.",
 	bio: [
-		'I study Information Technology at Telkom University, where I also work as a teaching assistant for Programming Algorithms. Outside of class, I host events, voice brand content and appear on camera for promotional work.',
+		'I study Information Technology at Telkom University, where I also work as a teaching assistant for Programming Algorithms. Outside of class, I host events, record voice overs for brands and model in promotional campaigns.',
 		"I've been at home in front of a crowd since my time as student council president at SMKN 1 Abang in Bali. At university I joined the public relations team of the IT student association, led its Bina Desa community programme of around 150 participants, and hosted five of its official events."
 	],
 	email: 'larasati.puan@gmail.com',
@@ -48,7 +48,7 @@ export const services = [
 	},
 	{
 		name: 'Model',
-		text: 'On-camera talent for promotional content, including work for METRO, GrabFood and Melinda Aesthetic Center.'
+		text: 'Promotional campaigns, including work for METRO, GrabFood and Melinda Aesthetic Center.'
 	}
 ];
 
@@ -220,7 +220,7 @@ export const brandLogos: Record<
 export const timeline = [
 	{
 		year: '2026',
-		title: 'Voice Over and On-Camera Talent, @infobdgcom',
+		title: 'Voice Over and Model, @infobdgcom',
 		text: 'Since August I have narrated and appeared in promotional reels for Bandung brands, including GrabFood, Garuda Indonesia, Eiger and METRO.'
 	},
 	{

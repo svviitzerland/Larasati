@@ -2,11 +2,35 @@
 	import { timeline } from '$lib/data';
 	import { reveal } from '$lib/actions/reveal';
 	import { onFrame } from '$lib/scroll.svelte';
-	import { panel, parallax } from '$lib/actions/motion';
 	import SectionHeading from './SectionHeading.svelte';
 
 	let list = $state<HTMLElement | null>(null);
 	let drawn = $state(0);
+	const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+	function centerAlongsideTimeline(node: HTMLElement) {
+		let translateY = 0;
+		const stop = onFrame(({ viewportH, viewportW }) => {
+			const content = node.parentElement;
+			if (!content || !list || viewportW < 1024) {
+				translateY = 0;
+				node.style.transform = '';
+				return;
+			}
+
+			const rect = node.getBoundingClientRect();
+			const bounds = list.getBoundingClientRect();
+			const contentTop = content.getBoundingClientRect().top;
+			const targetTop = clamp(
+				(viewportH - rect.height) / 2,
+				contentTop,
+				bounds.bottom - rect.height
+			);
+			translateY += targetTop - rect.top;
+			node.style.transform = `translate3d(0, ${translateY.toFixed(2)}px, 0)`;
+		});
+		return { destroy: () => stop() };
+	}
 
 	// garis waktu digambar mengikuti posisi gulir
 	$effect(() => {
@@ -22,12 +46,9 @@
 </script>
 
 <section id="jejak" class="trail">
-	<div class="wrap" use:panel={{ depth: 0.04, fade: 0.4 }}>
-		<div class="side" use:parallax={{ speed: 60 }}>
+	<div class="wrap">
+		<div class="side" use:centerAlongsideTimeline>
 			<SectionHeading title="Experience" italic="so far." />
-			<p class="say reveal" use:reveal={{ delay: 150 }}>
-				Organisations, teaching and paid work, from Bali to Bandung.
-			</p>
 		</div>
 
 		<ol bind:this={list}>
@@ -50,7 +71,7 @@
 <style>
 	.trail {
 		position: relative;
-		overflow: hidden;
+		overflow: clip;
 		padding: 8rem 1.5rem;
 		background: var(--color-mist);
 	}
@@ -73,14 +94,9 @@
 			gap: 6rem;
 			align-items: start;
 		}
-	}
-
-	.say {
-		margin-top: 2rem;
-		max-width: 24rem;
-		font-size: 0.94rem;
-		line-height: 1.9;
-		color: var(--color-dusk);
+		.side {
+			padding-left: clamp(2rem, 5vw, 4rem);
+		}
 	}
 
 	ol {
