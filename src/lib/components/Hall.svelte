@@ -130,7 +130,7 @@
 		<!-- sisanya berderet, tetap dengan nama brand dan perannya -->
 		<div class="more">
 			<p class="more-title reveal font-display" use:reveal={{ y: '12px', blur: 0 }}>More work</p>
-			<ul class="grid">
+			<ul class="grid" tabindex="0" aria-label="More work, scroll horizontally">
 				{#each rest as item, i (item.id)}
 					<li use:parallax={{ speed: drift[i % drift.length] }}>
 						<button
@@ -491,23 +491,43 @@
 	}
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 2.6rem 1rem;
+		grid-auto-flow: column;
+		grid-auto-columns: min(78vw, 19rem);
+		grid-template-rows: minmax(0, 1fr);
+		gap: 1rem;
 		margin-top: 2.4rem;
+		overflow-x: auto;
+		overflow-y: hidden;
+		overscroll-behavior-inline: contain;
+		scroll-snap-type: x mandatory;
+		scrollbar-color: color-mix(in srgb, var(--color-gold) 55%, transparent) transparent;
+		scrollbar-width: thin;
 	}
 	@media (min-width: 700px) {
 		.grid {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-			gap: 3.5rem 1.6rem;
+			grid-auto-columns: clamp(14rem, 17vw, 18rem);
+			gap: 1.6rem;
 		}
 	}
 	@media (min-width: 1200px) {
 		.grid {
-			grid-template-columns: repeat(6, minmax(0, 1fr));
-			gap: 3rem 1.4rem;
-			/* ruang untuk kolom yang turun lebih jauh */
-			padding-bottom: 3rem;
+			gap: 1.4rem;
+			padding-bottom: 1.5rem;
 		}
+	}
+	.grid::-webkit-scrollbar {
+		height: 0.3rem;
+	}
+	.grid::-webkit-scrollbar-track {
+		background: color-mix(in srgb, var(--color-ivory) 10%, transparent);
+	}
+	.grid::-webkit-scrollbar-thumb {
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-gold) 55%, transparent);
+	}
+	.grid > li {
+		min-width: 0;
+		scroll-snap-align: start;
 	}
 
 	.tile {

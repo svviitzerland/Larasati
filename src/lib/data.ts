@@ -88,8 +88,21 @@ export type GalleryItem = {
  */
 export const gallery: GalleryItem[] = [
 	{
-		id: 'r7',
+		id: 'r8',
 		no: 'I',
+		code: 'DfjbYzqvdrf',
+		title: 'Fitbar × ALD1: K-Pop Experience',
+		roles: ['Model', 'Voice Over'],
+		brand: 'Fitbar × Alpha Drive One',
+		account: '@infobdgcom',
+		date: '10 November 2026',
+		topic: 'Lifestyle and campus events',
+		note: 'A look at the FIT ALARM POP-UP TAKEOVER at Telkom University, where Fitbar and Alpha Drive One brought their Look Good, Feel Good, Do Good experience to campus.',
+		cover: '/gallery/reel-08.webp'
+	},
+	{
+		id: 'r7',
+		no: 'II',
 		code: 'DfGsQL2hu7H',
 		title: 'METRO One Day Super Special',
 		roles: ['Model', 'Voice Over'],
@@ -102,7 +115,7 @@ export const gallery: GalleryItem[] = [
 	},
 	{
 		id: 'r6',
-		no: 'II',
+		no: 'III',
 		code: 'DdOgwIVz71Z',
 		title: "Bandung's Viral Food and GrabFood's Diskon Puas",
 		roles: ['Model', 'Voice Over'],
@@ -115,7 +128,7 @@ export const gallery: GalleryItem[] = [
 	},
 	{
 		id: 'r5',
-		no: 'III',
+		no: 'IV',
 		code: 'DcxjYBwPr1f',
 		title: 'Road to Ionation 7th: Workout and Wellness',
 		roles: ['Voice Over'],
@@ -128,7 +141,7 @@ export const gallery: GalleryItem[] = [
 	},
 	{
 		id: 'r4',
-		no: 'IV',
+		no: 'V',
 		code: 'DcLjH4APliX',
 		title: 'Medikacom Carnaval: Creativity Without Limits',
 		roles: ['Voice Over'],
@@ -141,7 +154,7 @@ export const gallery: GalleryItem[] = [
 	},
 	{
 		id: 'r3',
-		no: 'V',
+		no: 'VI',
 		code: 'Db41xWjPf8K',
 		title: 'Eiger Women Flagship Store Opens in Bandung',
 		roles: ['Voice Over'],
@@ -154,7 +167,7 @@ export const gallery: GalleryItem[] = [
 	},
 	{
 		id: 'r2',
-		no: 'VI',
+		no: 'VII',
 		code: 'DbnMTkfzvMC',
 		title: 'Bandung to Denpasar, Non-Stop',
 		roles: ['Voice Over'],
@@ -167,7 +180,7 @@ export const gallery: GalleryItem[] = [
 	},
 	{
 		id: 'r1',
-		no: 'VII',
+		no: 'VIII',
 		code: 'Dbfl901PIbp',
 		title: 'A New Beauty Destination in Bandung',
 		roles: ['Model', 'Voice Over'],
@@ -181,10 +194,9 @@ export const gallery: GalleryItem[] = [
 ];
 
 /**
- * Logo brand untuk pita di bawah beranda. Berkasnya putih di atas latar
- * transparan dan hanya dipakai sebagai topeng, jadi warnanya selalu
- * mengikuti palet situs. `height` menyamakan bobot visual: logo yang
- * memanjang dibuat lebih pendek daripada logo yang bertumpuk.
+ * Logo brand untuk pita di bawah beranda. Berkasnya dipakai sebagai topeng,
+ * jadi warnanya selalu mengikuti palet situs. `height` menyamakan bobot
+ * visual: logo yang memanjang dibuat lebih pendek daripada logo yang bertumpuk.
  * `size` adalah tinggi tampil dalam rem, diatur manual per logo.
  * Kuncinya harus sama persis dengan `brand` di galeri.
  */
@@ -192,12 +204,17 @@ export const brandLogos: Record<
 	string,
 	{ src: string; width: number; height: number; size: number }
 > = {
+	'Fitbar × Alpha Drive One': {
+		src: '/brands/fitbar.webp',
+		width: 448,
+		height: 136,
+		size: 1.65
+	},
 	'METRO Department Store': { src: '/brands/metro.png', width: 499, height: 160, size: 2.0 },
 	GrabFood: { src: '/brands/grabfood.png', width: 840, height: 160, size: 1.6 },
-	'Ion Water by Pocari Sweat': { src: '/brands/ionwater.png', width: 176, height: 160, size: 3.1 },
-	'SMK Medikacom': { src: '/brands/medikacom.png', width: 691, height: 160, size: 1.85 },
+	'Ion Water by Pocari Sweat': { src: '/brands/ionwater.png', width: 1010, height: 883, size: 3.1 },
 	Eiger: { src: '/brands/eiger.png', width: 196, height: 160, size: 2.3 },
-	'Garuda Indonesia': { src: '/brands/garuda.png', width: 816, height: 160, size: 2.3 }
+	'Garuda Indonesia': { src: '/brands/garuda.png', width: 1700, height: 400, size: 3.0 }
 };
 
 export const timeline = [
