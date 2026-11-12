@@ -1,30 +1,60 @@
 <script lang="ts">
-	import { profile, services } from '$lib/data';
+	import { i18n } from '$lib/i18n/index.svelte';
 	import { reveal } from '$lib/actions/reveal';
 	import { panel, parallax } from '$lib/actions/motion';
 	import { marker } from '$lib/actions/marker';
+	import { onFrame } from '$lib/scroll.svelte';
 	import SectionHeading from './SectionHeading.svelte';
+
+	const t = $derived(i18n.t);
+
+	let rows = $state<HTMLElement[]>([]);
+	let reading = $state(-1);
+	let hovered = $state(-1);
+	// the row under the cursor wins over the row being read
+	const lit = $derived(hovered >= 0 ? hovered : reading);
+
+	/**
+	 * The service row crossing the middle of the screen lights up too, so the
+	 * effect that used to appear only under the cursor also shows on touch
+	 * screens.
+	 */
+	$effect(() => {
+		return onFrame((state) => {
+			const middle = state.viewportH * 0.52;
+			let next = -1;
+			for (let i = 0; i < rows.length; i++) {
+				const rect = rows[i]?.getBoundingClientRect();
+				if (rect && rect.top <= middle && rect.bottom > middle) next = i;
+			}
+			if (next !== reading) reading = next;
+		});
+	});
 </script>
 
-<section id="tentang" class="about">
-	<!-- efek panel dikenakan pada isinya, bukan pada latar, supaya tepi
-	     bagian ini tidak pernah terlihat saat menyusut -->
+<section id="about" class="about">
+	<!-- the panel effect is applied to the content, not the background, so the
+	     edge of this section never shows while it shrinks -->
 	<div class="wrap" use:panel={{ depth: 0.05, fade: 0.45 }}>
 		<div class="top">
 			<div class="side" use:parallax={{ speed: 46 }}>
-				<SectionHeading title="Nice to" italic="meet you." />
+				<SectionHeading title={t.ui.about.heading[0]} italic={t.ui.about.heading[1]} />
 			</div>
 
 			<div class="prose">
-				<p
-					class="lead reveal font-display"
-					use:reveal={{ y: '26px', delay: 120 }}
-					use:marker={{ delay: 520, step: 420 }}
-				>
-					{profile.intro}
-				</p>
+				<!-- the highlighter splits the text into lines once, so the paragraph
+				     is rebuilt when the language changes -->
+				{#key i18n.locale}
+					<p
+						class="lead reveal font-display"
+						use:reveal={{ y: '26px', delay: 120 }}
+						use:marker={{ delay: 520, step: 420 }}
+					>
+						{t.profile.intro}
+					</p>
+				{/key}
 
-				{#each profile.bio as paragraph, i (i)}
+				{#each t.profile.bio as paragraph, i (i)}
 					<p class="body reveal" use:reveal={{ delay: 200 + i * 90, y: '22px' }}>{paragraph}</p>
 				{/each}
 			</div>
@@ -32,12 +62,19 @@
 
 		<div class="services">
 			<h3 class="services-title reveal font-display" use:reveal={{ y: '16px', blur: 0 }}>
-				What I do
+				{t.ui.about.services}
 			</h3>
 
 			<ul>
-				{#each services as service, i (service.name)}
-					<li class="service" use:reveal={{ delay: i * 120, y: '0px', blur: 0 }}>
+				{#each t.services as service, i (service.name)}
+					<li
+						bind:this={rows[i]}
+						class="service"
+						class:lit={lit === i}
+						use:reveal={{ delay: i * 120, y: '0px', blur: 0 }}
+						onpointerenter={() => (hovered = i)}
+						onpointerleave={() => (hovered = -1)}
+					>
 						<span class="line-mask service-name font-display"><span>{service.name}</span></span>
 						<p class="reveal" use:reveal={{ delay: 160 + i * 120, y: '14px' }}>{service.text}</p>
 					</li>
@@ -99,7 +136,7 @@
 		margin-top: 2.4rem;
 	}
 
-	/* --- daftar layanan --- */
+	/* --- service list --- */
 	.services {
 		margin-top: 8rem;
 	}
@@ -141,7 +178,7 @@
 		transition: opacity 0.8s var(--ease-silk);
 		pointer-events: none;
 	}
-	.service:hover::before {
+	.service.lit::before {
 		opacity: 1;
 	}
 	.service-name {
@@ -153,7 +190,7 @@
 			color 0.6s var(--ease-silk),
 			transform 0.8s var(--ease-silk);
 	}
-	.service:hover .service-name {
+	.service.lit .service-name {
 		color: var(--color-roseink);
 		transform: translateX(0.6rem);
 	}

@@ -1,28 +1,30 @@
 /**
- * Semua isi situs ada di file ini, jadi cukup ubah teks dan foto di sini.
+ * All site content lives in this file, so text and photos are changed here.
+ * This is the English text. The Indonesian text for the same fields is in
+ * `src/lib/i18n/id.ts` and must be updated together with it.
  *
- * Isinya disusun dari profil resmi Larasati dan unggahan aslinya. Jangan
- * menambah angka, klien, atau testimoni yang tidak benar benar ada.
+ * It is compiled from Larasati's official profile and her real posts. Do not
+ * add numbers, clients or testimonials that do not actually exist.
  *
- * Sampul galeri disimpan di `static/gallery/` lalu ditulis sebagai
- * `/gallery/nama-berkas.webp` pada properti `cover`.
+ * Gallery covers are stored in `static/gallery/` and written as
+ * `/gallery/file-name.webp` in the `cover` property.
  */
 
 /**
- * Alamat situs yang sudah tayang, tanpa garis miring di akhir. Wajib diisi
- * supaya gambar pratinjau tautan (og:image) muncul di WhatsApp, LinkedIn,
- * dan media sosial lain, karena mereka hanya membaca alamat lengkap.
+ * The address of the live site, without a trailing slash. It must be set so
+ * the link preview image (og:image) shows up on WhatsApp, LinkedIn and other
+ * social media, because they only read absolute URLs.
  */
 export const siteUrl = 'https://larasati.my.id';
 
 export const profile = {
 	name: 'Larasati Putri Maharani',
 	shortName: 'Larasati',
-	/** dipakai sebagai monogram di navigasi */
+	/** used as the monogram in the navigation */
 	initials: 'Laras',
 	role: 'MC, Voice Over and Model in Bandung',
 	location: 'Bandung, Jawa Barat',
-	/** kalimat pembuka bagian Tentang */
+	/** opening sentence of the About section */
 	intro:
 		"Hi 👋 I'm Laras, an MC, voice over artist and model based in Bandung. You may have heard my voice on @infobdgcom reels, or seen me hosting events around campus.",
 	bio: [
@@ -36,7 +38,7 @@ export const profile = {
 	]
 };
 
-/** Hal yang bisa dikerjakan bersama, tampil sebagai daftar di bagian Tentang. */
+/** What she can be booked for, shown as a list in the About section. */
 export const services = [
 	{
 		name: 'Master of Ceremony',
@@ -52,22 +54,22 @@ export const services = [
 	}
 ];
 
-/** Tiga peran yang dikerjakan di depan panggung, mikrofon, dan kamera. */
+/** The three roles she works in: on stage, at the microphone and on camera. */
 export type Craft = 'Master of Ceremony' | 'Voice Over' | 'Model';
 
-/** urutannya dipakai sebagai keterangan singkat di bawah judul galeri */
+/** the order is used as a short caption under the gallery heading */
 export const crafts: Craft[] = ['Master of Ceremony', 'Voice Over', 'Model'];
 
 export type GalleryItem = {
 	id: string;
 	no: string;
-	/** kode pendek reel di Instagram, dipakai untuk pemutar sematan */
+	/** the Instagram reel shortcode, used for the embedded player */
 	code: string;
 	title: string;
 	roles: Craft[];
 	brand: string;
 	account: string;
-	/** tanggal tayang, ditulis apa adanya untuk pelat nama */
+	/** publication date, written as it should appear on the label */
 	date: string;
 	topic: string;
 	note: string;
@@ -75,16 +77,16 @@ export type GalleryItem = {
 };
 
 /**
- * Karya yang sudah tayang, satu blok untuk satu unggahan, diurutkan dari
- * yang paling baru tayang. Nomor romawinya mengikuti urutan tampil ini.
- * Sampulnya diunduh dari unggahan aslinya dan disimpan di `static/gallery/`, sedangkan videonya
- * diputar lewat sematan resmi Instagram saat dibuka.
+ * Published work, one block per post, ordered from the most recent.
+ * The Roman numerals follow this display order.
+ * Covers are downloaded from the original posts and stored in `static/gallery/`, and the video
+ * plays through Instagram's official embed when opened.
  *
- * Untuk menambah satu karya, salin satu blok ke paling atas lalu ganti `code`
- * dengan kode di tautan reel (bagian setelah `/reel/`), simpan sampulnya
- * sebagai `static/gallery/reel-xx.webp`, dan tulis ulang keterangannya.
- * Isi `roles` boleh lebih dari satu kalau satu karya menuntut dua peran.
- * Jangan lupa menggeser nomor romawi karya lainnya.
+ * To add a piece, copy a block to the top and replace `code` with the
+ * code in the reel link (the part after `/reel/`), save its cover as
+ * `static/gallery/reel-xx.webp`, and rewrite the details.
+ * `roles` may hold more than one entry when a piece involves two roles.
+ * Remember to shift the Roman numerals of the other pieces.
  */
 export const gallery: GalleryItem[] = [
 	{
@@ -194,11 +196,11 @@ export const gallery: GalleryItem[] = [
 ];
 
 /**
- * Logo brand untuk pita di bawah beranda. Berkasnya dipakai sebagai topeng,
- * jadi warnanya selalu mengikuti palet situs. `height` menyamakan bobot
- * visual: logo yang memanjang dibuat lebih pendek daripada logo yang bertumpuk.
- * `size` adalah tinggi tampil dalam rem, diatur manual per logo.
- * Kuncinya harus sama persis dengan `brand` di galeri.
+ * Brand logos for the band below the hero. Each file is used as a mask,
+ * so its colour always follows the site palette. `height` evens out the visual
+ * weight: wide logos are made shorter than stacked ones.
+ * `size` is the display height in rem, set by hand per logo.
+ * The key must match `brand` in the gallery exactly.
  */
 export const brandLogos: Record<
 	string,
@@ -255,11 +257,11 @@ export const timeline = [
 	}
 ];
 
-/** Bagian halaman untuk navigasi dan penanda gulir. */
+/** Page sections for the navigation and the scroll marker. */
 export const sections = [
-	{ id: 'atas', label: 'Home' },
-	{ id: 'tentang', label: 'About' },
-	{ id: 'galeri', label: 'Work' },
-	{ id: 'jejak', label: 'Experience' },
-	{ id: 'kontak', label: 'Contact' }
+	{ id: 'home', label: 'Home' },
+	{ id: 'about', label: 'About' },
+	{ id: 'work', label: 'Work' },
+	{ id: 'experience', label: 'Experience' },
+	{ id: 'contact', label: 'Contact' }
 ];

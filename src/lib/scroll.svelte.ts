@@ -1,18 +1,18 @@
 /**
- * Mesin gulir halus buatan sendiri.
+ * A hand-built smooth-scroll engine.
  *
- * Halaman tetap memakai scrollbar asli (sebuah elemen kosong setinggi konten
- * menjaga tinggi dokumen), lalu isi halaman digeser dengan transform yang
- * mengejar posisi scroll asli secara bertahap. Hasilnya gerak yang meluncur,
- * dan kecepatan luncur itu bisa dipakai komponen lain untuk beranimasi.
+ * The page keeps the native scrollbar (an empty element as tall as the content
+ * holds the document height), and the content is moved with a transform that
+ * eases towards the real scroll position. The result is a gliding motion,
+ * and its velocity is available to other components for animation.
  */
 
 export type FrameState = {
-	/** posisi gulir yang sudah dihaluskan */
+	/** the smoothed scroll position */
 	y: number;
-	/** selisih posisi antar frame, positif saat turun */
+	/** position change between frames, positive when moving down */
 	velocity: number;
-	/** 0 di puncak halaman, 1 di dasar halaman */
+	/** 0 at the top of the page, 1 at the bottom */
 	progress: number;
 	viewportH: number;
 	viewportW: number;
@@ -30,25 +30,25 @@ const frame: FrameState = {
 	direction: 1
 };
 
-/** Nilai ringkas untuk komponen yang perlu bereaksi lewat rune. */
+/** Compact values for components that need to react through runes. */
 export const motion = $state({ progress: 0, ready: false });
 
 type FrameHandler = (state: FrameState) => void;
 
-/* Kedua daftar ini sengaja memakai Set biasa. Isinya tidak pernah dibaca
-   oleh templat, hanya ditelusuri tiap frame, jadi tidak perlu reaktif. */
+/* Both lists use a plain Set on purpose. They are never read by a
+   template, only walked every frame, so they do not need to be reactive. */
 /* eslint-disable svelte/prefer-svelte-reactivity */
 const frameHandlers = new Set<FrameHandler>();
 const resizeHandlers = new Set<() => void>();
 /* eslint-enable svelte/prefer-svelte-reactivity */
 
-/** Dipanggil tiap frame. Tulis langsung ke style elemen supaya tetap ringan. */
+/** Called every frame. Write straight to the element's style to keep it cheap. */
 export function onFrame(handler: FrameHandler) {
 	frameHandlers.add(handler);
 	return () => frameHandlers.delete(handler);
 }
 
-/** Dipanggil setiap ukuran layar atau tinggi konten berubah. */
+/** Called whenever the viewport size or the content height changes. */
 export function onResize(handler: () => void) {
 	resizeHandlers.add(handler);
 	return () => resizeHandlers.delete(handler);
@@ -65,7 +65,7 @@ let glide: { from: number; to: number; start: number; duration: number } | null 
 let locked = false;
 let lockedY = 0;
 
-/** Meluncur ke posisi tertentu, dipakai untuk tautan navigasi. */
+/** Glides to a given position, used for navigation links. */
 export function glideTo(y: number, duration = 480) {
 	const limit = Math.max(frame.docHeight - frame.viewportH, 0);
 	glide = { from: window.scrollY, to: clamp(y, 0, limit), start: performance.now(), duration };
@@ -81,7 +81,7 @@ function stopGlide() {
 	glide = null;
 }
 
-/** Menyalakan mesin. Mengembalikan fungsi pembersih. */
+/** Starts the engine. Returns a cleanup function. */
 export function startScroll(content: HTMLElement, spacer: HTMLElement) {
 	let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 	let raf = 0;
@@ -103,9 +103,9 @@ export function startScroll(content: HTMLElement, spacer: HTMLElement) {
 
 		if (glide) {
 			const t = clamp((now - glide.start) / glide.duration, 0, 1);
-			// Mesin ini mengatur easing sendiri. Menulis ke scrollTop menghindari
-			// `scroll-behavior: smooth` browser yang akan menganimasikan ulang
-			// setiap langkah dan membuat tautan navigasi terasa macet.
+			// The engine handles its own easing. Writing to scrollTop avoids the
+			// browser's `scroll-behavior: smooth`, which would re-animate every
+			// step and make navigation links feel stuck.
 			document.documentElement.scrollTop = glide.from + (glide.to - glide.from) * easeOut(t);
 			if (t >= 1) glide = null;
 		}
@@ -156,8 +156,8 @@ export function startScroll(content: HTMLElement, spacer: HTMLElement) {
 }
 
 /**
- * Mengunci gulir selama tampilan karya terbuka. Posisi disimpan lalu
- * dikembalikan sebelum kunci dilepas, jadi halaman tidak melompat ke atas.
+ * Locks scrolling while the reel viewer is open. The position is saved and
+ * restored before the lock is released, so the page does not jump to the top.
  */
 export function lockScroll(on: boolean) {
 	if (on) {

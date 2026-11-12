@@ -1,23 +1,23 @@
 type RevealOptions = {
-	/** jeda sebelum animasi mulai (ms) */
+	/** delay before the animation starts (ms) */
 	delay?: number;
-	/** geser vertikal awal, mis. '40px' */
+	/** initial vertical offset, e.g. '40px' */
 	y?: string;
-	/** geser horizontal awal */
+	/** initial horizontal offset */
 	x?: string;
-	/** skala awal */
+	/** initial scale */
 	scale?: number;
-	/** blur awal dalam px */
+	/** initial blur in px */
 	blur?: number;
-	/** berapa bagian elemen yang harus terlihat (0–1) */
+	/** how much of the element must be visible (0–1) */
 	threshold?: number;
-	/** ulangi animasi tiap kali elemen keluar-masuk layar */
+	/** replay the animation every time the element leaves and re-enters the screen */
 	repeat?: boolean;
 };
 
 /**
- * Menambahkan kelas `is-in` saat elemen masuk viewport.
- * Gaya transisinya sendiri ada di layout.css (`.reveal`, `.line-mask`, `.rule-grow`).
+ * Adds the `is-in` class when the element enters the viewport.
+ * The transition styles live in layout.css (`.reveal`, `.line-mask`, `.rule-grow`).
  */
 export function reveal(node: HTMLElement, options: RevealOptions = {}) {
 	let observer: IntersectionObserver | null = null;

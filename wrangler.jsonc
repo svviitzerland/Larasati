@@ -1,13 +1,13 @@
 {
-	// Konfigurasi untuk Cloudflare. Dengan berkas ini, wrangler tidak lagi
-	// menjalankan penyetelan otomatis yang sempat menyisipkan
-	// `wrangler types --check` ke dalam skrip build.
+	// Cloudflare configuration. With this file, wrangler no longer
+	// runs the automatic setup that once inserted
+	// `wrangler types --check` into the build script.
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "portfolio-laras",
 	"compatibility_date": "2026-07-01",
 	"compatibility_flags": ["nodejs_compat"],
 
-	// Hasil build dari @sveltejs/adapter-cloudflare.
+	// Build output from @sveltejs/adapter-cloudflare.
 	"main": ".svelte-kit/cloudflare/_worker.js",
 	"assets": {
 		"binding": "ASSETS",

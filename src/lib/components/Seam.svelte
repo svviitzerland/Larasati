@@ -1,8 +1,8 @@
 <script lang="ts">
 	/**
-	 * Sambungan antar bagian. Warna bagian berikutnya naik dalam bentuk
-	 * lengkungan lebar, jadi peralihannya terasa seperti gelombang tenang
-	 * dan bukan garis mendatar.
+	 * A join between sections. The colour of the next section rises as a wide
+	 * arc, so the change feels like a calm swell
+	 * and not a flat line.
 	 */
 	let {
 		from = 'var(--color-ivory)',
@@ -24,14 +24,14 @@
 		pointer-events: none;
 	}
 
-	/* lengkungan lebar dan landai */
+	/* a wide, shallow arc */
 	.swell {
 		position: absolute;
 		inset: 45% -12% -2% -12%;
 		border-radius: 50% 50% 0 0 / 100% 100% 0 0;
 	}
 
-	/* satu garis rambut mengikuti puncak lengkungan */
+	/* one hairline following the crest of the arc */
 	.line {
 		position: absolute;
 		inset: calc(45% - 0.6rem) -12% auto -12%;

@@ -2,15 +2,15 @@ import { sections } from './data';
 import { onFrame } from './scroll.svelte';
 
 /**
- * Keadaan bersama untuk elemen melayang.
- * `dark` menyalakan gaya terang saat melintasi galeri yang berlatar gelap,
- * `active` menandai bagian halaman yang sedang dibaca.
+ * Shared state for the floating elements.
+ * `dark` switches on the light styles while crossing the dark gallery,
+ * `active` marks the page section being read.
  */
 export const ui = $state({ dark: false, active: 0 });
 
-/** Satu pemantau untuk navigasi dan penanda gulir sekaligus. */
-export function watchSections(darkId = 'galeri') {
-	// hanya penyimpan rujukan elemen, tidak pernah dibaca oleh templat
+/** One watcher for both the navigation and the scroll marker. */
+export function watchSections(darkId = 'work') {
+	// only holds element references, never read by a template
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	const cache = new Map<string, HTMLElement>();
 

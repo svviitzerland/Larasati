@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-	<defs>
-		<linearGradient id="ink" x1="0.2" y1="0" x2="0.8" y2="1">
-			<stop offset="0" stop-color="#9c8579" />
-			<stop offset="0.55" stop-color="#8d766c" />
-			<stop offset="1" stop-color="#715c56" />
-		</linearGradient>
-	</defs>
-
-	<!-- Huruf L miring dari Cormorant Garamond, tipografi yang sama dengan
-	     judul di situs. Bentuknya sudah diubah menjadi jalur, jadi tidak
-	     bergantung pada font yang terpasang di perangkat pembaca. -->
+	<!-- An italic L from Cormorant Garamond, the same typeface as the
+	     headings on the site, in the rose of the site palette. The
+	     shape is converted to a path, so it does not depend on a font
+	     installed on the reader's device. The stroke thickens it slightly so
+	     it stays readable at tab size. -->
 	<path
-		fill="url(#ink)"
+		fill="#c48d90"
+		stroke="#c48d90"
+		stroke-width="1.5"
+		stroke-linejoin="round"
+		transform="translate(28 32) scale(1.15) translate(-32 -32)"
 		d="M45.65 55L14.96 55Q14.81 55 14.81 54.56Q14.81 54.12 14.96 54.12Q17.24 54.12 18.45 53.75Q19.67 53.38 20.26 52.28Q20.84 51.17 21.21 49.04L27.25 14.96Q27.84 11.80 26.99 10.84Q26.14 9.88 22.76 9.88Q22.61 9.88 22.61 9.44Q22.61 9 22.76 9Q24.30 9 26.14 9.11Q27.98 9.22 30.12 9.22Q32.25 9.22 34.28 9.11Q36.30 9 37.70 9Q37.85 9 37.85 9.44Q37.85 9.88 37.70 9.88Q35.42 9.88 34.20 10.29Q32.99 10.69 32.44 11.80Q31.88 12.90 31.44 15.04L25.48 48.74Q24.97 51.84 25.74 52.72Q26.51 53.60 29.68 53.60L37.11 53.60Q41.38 53.60 44.03 50.95Q46.68 48.30 48.30 43.81Q48.30 43.59 48.78 43.67Q49.25 43.74 49.18 43.96Q48.59 45.95 47.89 48.74Q47.19 51.54 46.83 53.90Q46.60 55 45.65 55"
 	/>
+
+	<!-- the gold full stop that ends the headings on the site -->
+	<circle cx="56.5" cy="54.5" r="4.2" fill="#bfa46f" />
 </svg>

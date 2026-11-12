@@ -1,11 +1,16 @@
 <script lang="ts">
-	import { timeline } from '$lib/data';
+	import { i18n } from '$lib/i18n/index.svelte';
 	import { reveal } from '$lib/actions/reveal';
 	import { onFrame } from '$lib/scroll.svelte';
 	import SectionHeading from './SectionHeading.svelte';
 
+	const timeline = $derived(i18n.t.timeline);
+
 	let list = $state<HTMLElement | null>(null);
 	let drawn = $state(0);
+	let entries = $state<HTMLElement[]>([]);
+	// the entry the line is passing; its year is shown large on the left
+	let now = $state(0);
 	const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 	function centerAlongsideTimeline(node: HTMLElement) {
@@ -32,7 +37,7 @@
 		return { destroy: () => stop() };
 	}
 
-	// garis waktu digambar mengikuti posisi gulir
+	// the timeline is drawn as the page scrolls
 	$effect(() => {
 		if (!list) return;
 		return onFrame((state) => {
@@ -41,14 +46,29 @@
 			const span = rect.height + state.viewportH * 0.35;
 			const seen = (state.viewportH * 0.75 - rect.top) / span;
 			drawn = Math.min(Math.max(seen, 0), 1);
+
+			let current = 0;
+			for (let i = 0; i < entries.length; i++) {
+				const top = entries[i]?.getBoundingClientRect().top ?? Infinity;
+				if (top <= state.viewportH * 0.55) current = i;
+			}
+			if (current !== now) now = current;
 		});
 	});
 </script>
 
-<section id="jejak" class="trail">
+<section id="experience" class="trail">
 	<div class="wrap">
 		<div class="side" use:centerAlongsideTimeline>
-			<SectionHeading title="Experience" italic="so far." />
+			<SectionHeading
+				title={i18n.t.ui.timeline.heading[0]}
+				italic={i18n.t.ui.timeline.heading[1]}
+			/>
+			<p class="era font-display" aria-hidden="true">
+				{#key timeline[now].year}
+					<span>{timeline[now].year}</span>
+				{/key}
+			</p>
 		</div>
 
 		<ol bind:this={list}>
@@ -56,8 +76,13 @@
 				<span style:transform="scaleY({drawn})"></span>
 			</span>
 
-			{#each timeline as entry, i (entry.title)}
-				<li class="reveal" use:reveal={{ delay: i * 100, y: '30px' }}>
+			{#each timeline as entry, i (i)}
+				<li
+					bind:this={entries[i]}
+					class="reveal"
+					class:now={now === i}
+					use:reveal={{ delay: i * 100, y: '30px' }}
+				>
 					<span class="node" aria-hidden="true"></span>
 					<span class="year label-caps">{entry.year}</span>
 					<h3 class="font-display">{entry.title}</h3>
@@ -99,6 +124,35 @@
 		}
 	}
 
+	/* a large year that changes with the entry being read */
+	.era {
+		display: none;
+	}
+	@media (min-width: 1024px) {
+		.era {
+			display: block;
+			height: 1em;
+			margin-top: 1.6rem;
+			overflow: hidden;
+			font-size: clamp(4.5rem, 7vw, 6rem);
+			font-style: italic;
+			font-weight: 300;
+			line-height: 1;
+			font-variant-numeric: lining-nums;
+			color: color-mix(in srgb, var(--color-rose) 55%, var(--color-mist));
+		}
+		.era span {
+			display: block;
+			animation: tick 0.9s var(--ease-silk) both;
+		}
+	}
+	@keyframes tick {
+		from {
+			opacity: 0;
+			transform: translateY(70%);
+		}
+	}
+
 	ol {
 		position: relative;
 	}
@@ -122,8 +176,8 @@
 		background: var(--color-rose);
 	}
 
-	/* ruang untuk tahun ditaruh sebagai padding, bukan margin judul,
-	   supaya tidak bocor keluar dan ikut menggeser label tahunnya */
+	/* the room for the year is padding, not a heading margin,
+	   so it does not leak out and shift the year label */
 	li {
 		position: relative;
 		padding: 1.9rem 0 3.5rem 2rem;
@@ -158,6 +212,7 @@
 			top: 0.4rem;
 		}
 	}
+	li.now .node,
 	li:hover .node {
 		background: var(--color-rose);
 		border-color: var(--color-rose);

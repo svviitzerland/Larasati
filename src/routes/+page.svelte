@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { profile, siteUrl } from '$lib/data';
+	import { i18n } from '$lib/i18n/index.svelte';
 	import { watchSections } from '$lib/ui.svelte';
 	import Smooth from '$lib/components/Smooth.svelte';
 	import Nav from '$lib/components/Nav.svelte';
@@ -13,12 +14,16 @@
 	import Lightbox from '$lib/components/Lightbox.svelte';
 	import Seam from '$lib/components/Seam.svelte';
 
-	const description = `${profile.name} is an MC, voice over artist and model based in Bandung. Explore her recent work and get in touch.`;
+	const description = $derived(i18n.t.ui.meta.description(profile.name));
 
 	const ogImage = `${siteUrl}/og.jpg`;
 
-	// satu pemantau untuk navigasi dan penanda gulir
-	$effect(() => watchSections('galeri'));
+	// one watcher for the navigation and the scroll marker
+	$effect(() => watchSections('work'));
+
+	// the page is prerendered in English, so a returning visitor's saved
+	// language is applied once the page is running in the browser
+	$effect(() => i18n.restore());
 </script>
 
 <svelte:head>
@@ -29,11 +34,9 @@
 	<meta property="og:image" content={ogImage} />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
-	<meta
-		property="og:image:alt"
-		content="Larasati Putri Maharani, MC, voice over and model in Bandung"
-	/>
-	{#if siteUrl}<meta property="og:url" content="{siteUrl}/" />{/if}
+	<meta property="og:image:alt" content={i18n.t.ui.meta.imageAlt} />
+	<meta property="og:url" content="{siteUrl}/" />
+	<link rel="canonical" href="{siteUrl}/" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={profile.name} />
 	<meta name="twitter:description" content={description} />
@@ -41,7 +44,7 @@
 	<meta property="og:type" content="website" />
 </svelte:head>
 
-<!-- semua yang melayang hidup di luar lapisan gulir supaya tetap menempel di layar -->
+<!-- everything that floats lives outside the scroll layer so it stays fixed on screen -->
 <Nav />
 <Cursor />
 <Lightbox />
@@ -51,7 +54,7 @@
 		<Hero />
 		<Marquee />
 		<About />
-		<!-- peralihan gelap dan terang ditangani di dalam Hall sendiri -->
+		<!-- the dark and light transitions are handled inside Hall itself -->
 		<Hall />
 		<Timeline />
 		<Seam from="var(--color-mist)" to="var(--color-ivory)" height="14vh" />

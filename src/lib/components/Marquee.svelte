@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { brandLogos, gallery } from '$lib/data';
+	import { i18n } from '$lib/i18n/index.svelte';
 	import { onFrame, onResize } from '$lib/scroll.svelte';
 	import { openViewer } from '$lib/viewer.svelte';
 
 	/**
-	 * Satu logo per brand, urut dari reel terbaru. Brand yang belum punya
-	 * berkas logo dilewati, dan klik pada logo membuka reel terbarunya.
+	 * One logo per brand, ordered from the newest reel. Brands without a logo
+	 * file are skipped, and clicking a logo opens that brand's newest reel.
 	 */
 	const brands = gallery
 		.map((item, index) => ({ name: item.brand, index, logo: brandLogos[item.brand] }))
 		.filter((brand, i, list) => brand.logo && list.findIndex((b) => b.name === brand.name) === i);
 
-	// diulang tiga kali supaya pita tidak pernah tampak terputus di layar lebar
+	// repeated three times so the band never looks broken on wide screens
 	const loop = [0, 1, 2];
 
 	let track = $state<HTMLElement | null>(null);
@@ -19,9 +20,9 @@
 	let paused = $state(false);
 
 	/**
-	 * Pita berjalan pelan sendiri, lalu ikut terdorong saat halaman digulir.
-	 * Dorongannya diredam supaya terasa seperti kain berat yang tertarik,
-	 * bukan melompat.
+	 * The band drifts slowly on its own, then gets pushed along when the page
+	 * scrolls. The push is damped so it feels like heavy cloth being pulled,
+	 * not a jump.
 	 */
 	$effect(() => {
 		if (!track || !sets[0]) return;
@@ -48,7 +49,7 @@
 	});
 </script>
 
-<section class="band" aria-label="Brands Larasati has worked on">
+<section class="band" aria-label={i18n.t.ui.brands.label}>
 	<div
 		class="viewport"
 		role="presentation"
@@ -65,8 +66,8 @@
 								class="logo"
 								tabindex={copy > 0 ? -1 : 0}
 								onclick={() => openViewer(brand.index)}
-								data-cursor="Play"
-								aria-label="Play the reel for {brand.name}"
+								data-cursor
+								aria-label={i18n.t.ui.brands.play(brand.name)}
 								style:--src="url({brand.logo.src})"
 								style:height="{brand.logo.size}rem"
 								style:aspect-ratio="{brand.logo.width} / {brand.logo.height}"
@@ -85,7 +86,7 @@
 		padding: 3rem 0 3.4rem;
 		background: var(--color-ivory);
 	}
-	/* garis rambut tipis di atas dan bawah, memudar di kedua ujung */
+	/* thin hairlines above and below, fading at both ends */
 	.band::before,
 	.band::after {
 		content: '';
@@ -127,7 +128,7 @@
 		padding-inline: clamp(2rem, 4.5vw, 4rem);
 	}
 
-	/* logo dipakai sebagai topeng, warnanya datang dari palet */
+	/* the logo is used as a mask, its colour comes from the palette */
 	.logo {
 		display: block;
 		background: var(--color-mocha);

@@ -1,20 +1,20 @@
 import { onResize } from '$lib/scroll.svelte';
 
 type MarkerOptions = {
-	/** jeda sebelum baris pertama disapu (ms) */
+	/** delay before the first line is swept (ms) */
 	delay?: number;
-	/** jarak waktu antar baris (ms) */
+	/** time between lines (ms) */
 	step?: number;
 };
 
 /**
- * Menyapu teks dengan stabilo, satu baris demi satu baris, ketika paragraf
- * masuk ke layar.
+ * Sweeps a highlighter over the text, one line at a time, when the paragraph
+ * enters the screen.
  *
- * Cara kerjanya, teks dipecah menjadi kata, lalu kata kata yang berada pada
- * baris yang sama dikelompokkan ke dalam satu span. Karena tiap span hanya
- * selebar barisnya sendiri, sapuan warnanya berhenti persis di ujung kalimat
- * dan mengikuti tepi teks yang tidak rata.
+ * The text is split into words, then the words that sit on the same line are
+ * grouped into one span. Each span is only as wide as its own line, so the
+ * sweep stops exactly at the end of the sentence and follows the ragged
+ * edge of the text.
  */
 export function marker(node: HTMLElement, options: MarkerOptions = {}) {
 	const source = (node.textContent ?? '').replace(/\s+/g, ' ').trim();
@@ -29,7 +29,7 @@ export function marker(node: HTMLElement, options: MarkerOptions = {}) {
 	const paint = () => {
 		node.classList.remove('is-lit');
 
-		// tahap satu, setiap kata dibungkus supaya posisinya bisa diukur
+		// step one, wrap every word so its position can be measured
 		const words = source.split(' ').filter(Boolean);
 		const probe = document.createDocumentFragment();
 		const cells: HTMLElement[] = [];
@@ -43,7 +43,7 @@ export function marker(node: HTMLElement, options: MarkerOptions = {}) {
 		});
 		node.replaceChildren(probe);
 
-		// tahap dua, kata dikelompokkan menurut baris tempatnya berada
+		// step two, group the words by the line they sit on
 		const lines: string[][] = [];
 		let previous = Number.NaN;
 		for (const cell of cells) {
@@ -55,7 +55,7 @@ export function marker(node: HTMLElement, options: MarkerOptions = {}) {
 			lines[lines.length - 1].push(cell.textContent ?? '');
 		}
 
-		// tahap tiga, tiap baris mendapat satu span berlatar stabilo
+		// step three, give each line one span with the highlighter background
 		const painted = document.createDocumentFragment();
 		lines.forEach((line, i) => {
 			const row = document.createElement('span');
@@ -88,7 +88,7 @@ export function marker(node: HTMLElement, options: MarkerOptions = {}) {
 		watch();
 	};
 
-	// susunan baris hanya perlu dihitung ulang kalau lebarnya berubah
+	// the lines only need to be rebuilt when the width changes
 	const remeasure = () => {
 		const next = node.clientWidth;
 		if (next === width) return;

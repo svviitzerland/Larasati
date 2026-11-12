@@ -13,11 +13,11 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 
-			// Situs ini dibangun untuk Cloudflare, baik lewat Pages maupun
-			// Workers. Hasil build ada di `.svelte-kit/cloudflare`, dan
-			// pengaturan untuk Workers ada di `wrangler.jsonc`. Karena seluruh
-			// halaman diprarender (lihat `src/routes/+layout.ts`), isinya
-			// disajikan sebagai berkas statis dari jaringan Cloudflare.
+			// This site is built for Cloudflare, through either Pages or
+			// Workers. The build output is in `.svelte-kit/cloudflare`, and
+			// the Workers settings are in `wrangler.jsonc`. Because the whole
+			// page is prerendered (see `src/routes/+layout.ts`), it is
+			// served as static files from the Cloudflare network.
 			// https://svelte.dev/docs/kit/adapter-cloudflare
 			adapter: adapter({
 				routes: {

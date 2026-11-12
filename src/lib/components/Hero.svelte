@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { i18n } from '$lib/i18n/index.svelte';
 	import { glideToId, onFrame } from '$lib/scroll.svelte';
 
 	let started = $state(false);
@@ -10,7 +11,7 @@
 	let second = $state<HTMLElement | null>(null);
 	let center = $state<HTMLElement | null>(null);
 
-	// lampu sorot yang mengejar kursor dengan lembut
+	// spotlight that gently chases the cursor
 	let aimX = 0;
 	let aimY = 0;
 	let atX = 0;
@@ -38,20 +39,20 @@
 
 			if (beam) beam.style.transform = `translate3d(${atX.toFixed(1)}px, ${atY.toFixed(1)}px, 0)`;
 
-			// nama bergeser tipis ke arah sorotan
+			// the name shifts slightly towards the spotlight
 			if (title && rect) {
 				const dx = (atX / Math.max(rect.width, 1) - 0.5) * 16;
 				const dy = (atY / Math.max(rect.height, 1) - 0.5) * 10;
 				title.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0)`;
 			}
 
-			// saat mulai digulir, dua baris nama merenggang ke arah berlawanan
+			// once scrolling starts, the two lines of the name drift apart in opposite directions
 			const leave = Math.min(Math.max(state.y / Math.max(state.viewportH, 1), 0), 1);
 			const spread = leave * Math.min(state.viewportW, 1400) * 0.06;
 			if (first) first.style.transform = `translate3d(${(-spread).toFixed(1)}px, 0, 0)`;
 			if (second) second.style.transform = `translate3d(${spread.toFixed(1)}px, 0, 0)`;
-			// seluruh isi beranda mundur pelan dan memudar, seperti tirai
-			// yang ditarik sebelum bagian berikutnya naik
+			// the whole hero eases back and fades, like a curtain
+			// being drawn before the next section rises
 			if (center) {
 				center.style.opacity = (1 - leave * 0.85).toFixed(3);
 				center.style.filter = leave > 0.02 ? `blur(${(leave * 3).toFixed(2)}px)` : 'none';
@@ -69,13 +70,13 @@
 </script>
 
 <section
-	id="atas"
+	id="home"
 	bind:this={stage}
 	class="hero"
 	class:started
 	class:is-in={started}
 	onpointermove={aim}
-	aria-label="Home"
+	aria-label={i18n.t.sections[0].label}
 >
 	<div class="ambient" aria-hidden="true">
 		<span class="orb one"></span>
@@ -83,7 +84,7 @@
 		<span bind:this={beam} class="beamlight"></span>
 	</div>
 
-	<!-- lengkung tipis yang menggambar dirinya sendiri saat halaman dibuka -->
+	<!-- a thin arch that draws itself when the page opens -->
 	<svg
 		class="gate"
 		viewBox="0 0 400 520"
@@ -106,8 +107,8 @@
 			</span>
 		</h1>
 
-		<button type="button" class="see" onclick={() => glideToId('galeri')} data-cursor="View">
-			<span>See the work</span>
+		<button type="button" class="see" onclick={() => glideToId('work')} data-cursor>
+			<span>{i18n.t.ui.hero.see}</span>
 			<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" /></svg>
 		</button>
 	</div>
@@ -131,9 +132,9 @@
 		pointer-events: none;
 		mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
 	}
-	/* Cahaya latar memakai gradasi lingkaran, bukan lingkaran padat yang
-	   diberi blur. Hasilnya nyaris sama tetapi jauh lebih ringan, terutama
-	   di Safari yang mahal sekali menggambar blur berjari jari besar. */
+	/* The background glow uses radial gradients, not solid circles with a
+	   blur. The result is nearly identical but far cheaper, above all in
+	   Safari, where large-radius blurs are very expensive to paint. */
 	.orb {
 		position: absolute;
 		border-radius: 999px;
@@ -165,7 +166,7 @@
 		animation: drift 27s ease-in-out infinite reverse;
 	}
 
-	/* sorotan hangat yang mengikuti kursor */
+	/* warm spotlight that follows the cursor */
 	.beamlight {
 		position: absolute;
 		top: 0;
@@ -187,7 +188,7 @@
 		opacity: 1;
 	}
 
-	/* lengkung latar, sama seperti gerbang galeri */
+	/* background arch, the same as the gallery gateway */
 	.gate {
 		position: absolute;
 		bottom: 0;
@@ -196,7 +197,7 @@
 		height: min(36rem, 64svh);
 		transform: translateX(-50%);
 		pointer-events: none;
-		/* kaki lengkungnya dibiarkan larut, bukan terpotong tepi layar */
+		/* the legs of the arch dissolve instead of being cut by the screen edge */
 		mask-image: linear-gradient(to bottom, #000 45%, transparent 92%);
 	}
 	.gate path {

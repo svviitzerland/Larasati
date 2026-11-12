@@ -1,27 +1,52 @@
 <script lang="ts">
 	import { profile } from '$lib/data';
+	import { i18n } from '$lib/i18n/index.svelte';
 	import { reveal } from '$lib/actions/reveal';
 	import { magnetic, parallax } from '$lib/actions/motion';
+	import { onFrame } from '$lib/scroll.svelte';
 
-	const year = new Date().getFullYear();
+	let section = $state<HTMLElement | null>(null);
+
+	/**
+	 * The page opens with an arch in the hero and closes with the same arch.
+	 * Here the line is drawn by the scroll, not by time.
+	 */
+	$effect(() => {
+		if (!section) return;
+		const el = section;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			el.style.setProperty('--draw', '1');
+			return;
+		}
+		return onFrame((state) => {
+			const rect = el.getBoundingClientRect();
+			if (rect.top > state.viewportH) return;
+			const seen = (state.viewportH - rect.top) / Math.max(rect.height, 1);
+			const t = Math.min(Math.max((seen - 0.12) / 0.8, 0), 1);
+			el.style.setProperty('--draw', (1 - Math.pow(1 - t, 2)).toFixed(4));
+		});
+	});
 </script>
 
-<!-- Semua tautan di bagian ini memang menuju ke luar situs, bukan ke halaman lain. -->
+<!-- Every link in this section leaves the site on purpose. -->
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
-<section id="kontak" class="close">
+<section id="contact" bind:this={section} class="close">
 	<div class="halo" aria-hidden="true">
 		<span class="orb" use:parallax={{ speed: -70 }}></span>
 	</div>
 
+	<span class="gate" aria-hidden="true"></span>
+
 	<div class="wrap">
 		<h2 class="font-display" use:reveal>
-			<span class="line-mask"><span>Have a project</span></span>
-			<span class="line-mask" style="--rv-delay:140ms"><span class="rose">in mind?</span></span>
+			<span class="line-mask"><span>{i18n.t.ui.contact.heading[0]}</span></span>
+			<span class="line-mask" style="--rv-delay:140ms"
+				><span class="rose">{i18n.t.ui.contact.heading[1]}</span></span
+			>
 		</h2>
 
 		<p class="say reveal" use:reveal={{ delay: 220 }}>
-			I'm available for events, voice over and brand campaigns. Send me an email with the date, the
-			location and a few words about what you have in mind.
+			{i18n.t.ui.contact.say}
 		</p>
 
 		<a
@@ -29,7 +54,7 @@
 			href="mailto:{profile.email}"
 			use:reveal={{ delay: 320 }}
 			use:magnetic={0.18}
-			data-cursor="Email"
+			data-cursor
 		>
 			{profile.email}
 		</a>
@@ -40,24 +65,42 @@
 			{/each}
 		</div>
 	</div>
-
-	<footer>
-		<p class="label-caps">{year} {profile.name}</p>
-	</footer>
 </section>
 
 <style>
 	.close {
 		position: relative;
 		overflow: hidden;
-		padding: 8rem 1.5rem 3rem;
+		--draw: 0;
+		display: grid;
+		align-items: center;
+		min-height: 100svh;
+		padding: 8rem 1.5rem 7rem;
 		background: var(--color-ivory);
 		text-align: center;
 	}
 	@media (min-width: 768px) {
 		.close {
-			padding: 12rem 3rem 3rem;
+			padding: 10rem 3rem 9rem;
 		}
+	}
+
+	/* closing arch, drawn as the page scrolls */
+	.gate {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		/* on narrow screens the legs run off the edges and only the arc remains */
+		width: min(60rem, 118vw);
+		height: 90%;
+		transform: translateX(-50%);
+		border: 1px solid color-mix(in srgb, var(--color-rose) 46%, transparent);
+		border-bottom: 0;
+		border-radius: 50% 50% 0 0 / 38% 38% 0 0;
+		/* both legs rise from the floor and meet at the top */
+		clip-path: inset(calc((1 - var(--draw)) * 100%) 0 0 0);
+		mask-image: linear-gradient(to bottom, #000 55%, transparent 96%);
+		pointer-events: none;
 	}
 
 	.halo {
@@ -74,7 +117,7 @@
 		height: 38rem;
 		margin-left: -19rem;
 		border-radius: 999px;
-		/* gradasi lingkaran, bukan blur, supaya ringan digambar */
+		/* a radial gradient instead of blur, so it is cheap to paint */
 		background: radial-gradient(
 			circle at center,
 			color-mix(in srgb, var(--color-blush) 52%, transparent) 0%,
@@ -151,16 +194,5 @@
 	.socials a:hover {
 		color: var(--color-ink);
 		border-color: var(--color-ink);
-	}
-
-	footer {
-		position: relative;
-		display: flex;
-		justify-content: center;
-		max-width: 1500px;
-		margin: 7rem auto 0;
-		padding-top: 2.5rem;
-		border-top: 1px solid color-mix(in srgb, var(--color-sand) 70%, transparent);
-		color: color-mix(in srgb, var(--color-mocha) 75%, transparent);
 	}
 </style>

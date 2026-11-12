@@ -1,5 +1,5 @@
-// Seluruh isi situs bersifat statis, jadi halaman diprarender saat build.
-// Di Cloudflare Pages hasilnya disajikan langsung dari jaringan tepi
-// tanpa perlu menjalankan worker untuk tiap permintaan.
+// The whole site is static, so the page is prerendered at build time.
+// On Cloudflare Pages the result is served straight from the edge network
+// without running a worker for each request.
 export const prerender = true;
 export const ssr = true;

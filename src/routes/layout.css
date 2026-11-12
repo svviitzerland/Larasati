@@ -3,20 +3,20 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-	/* --- Palet: ivory hangat, mocha, rose, emas tua, noir museum --- */
+	/* --- Palette: warm ivory, mocha, rose, old gold, museum noir --- */
 	--color-ivory: #fbf8f5;
 	--color-shell: #f3ece5;
 	--color-sand: #e7dbd1;
 	--color-blush: #ecd6d2;
 	--color-rose: #c48d90;
-	/* rose yang lebih dalam untuk teks, supaya tetap terbaca di atas ivory */
+	/* a deeper rose for text, so it stays readable on ivory */
 	--color-roseink: #a0646a;
 	--color-mocha: #8d766c;
 	--color-ink: #241d1b;
 	--color-noir: #14100f;
 	--color-noirsoft: #1e1817;
 	--color-gold: #bfa46f;
-	/* warna antara, dipakai saat terang melebur ke gelap */
+	/* in-between colours, used where light melts into dark */
 	--color-mist: #f7f1ec;
 	--color-dusk: #4a3a34;
 
@@ -31,11 +31,11 @@
 		scroll-behavior: smooth;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
-		/* Scrollbar bawaan disembunyikan karena lebarnya memakan ruang di
-		   sisi kanan dan membuat seluruh isi halaman bergeser dari titik
-		   tengah jendela. Gulir tetap berjalan lewat roda tetikus, trackpad,
-		   dan papan ketik, sementara posisi baca ditunjukkan oleh cincin
-		   progres di monogram navigasi. */
+		/* The native scrollbar is hidden because its width takes space on
+		   the right and pushes the whole page off the centre of the
+		   window. Scrolling still works with the mouse wheel, trackpad
+		   and keyboard, and the reading position is shown by the
+		   progress fill in the navigation wordmark. */
 		scrollbar-width: none;
 	}
 
@@ -45,13 +45,13 @@
 		font-family: var(--font-sans);
 		font-weight: 300;
 		overflow-x: hidden;
-		/* tinggi dokumen diatur sendiri oleh mesin gulir, jadi penjangkaran
-		   bawaan peramban harus dimatikan supaya posisi tidak melompat */
+		/* the document height is managed by the scroll engine, so native
+		   scroll anchoring must be off to keep the position from jumping */
 		overflow-anchor: none;
 	}
 
-	/* butiran kertas yang sangat halus di atas seluruh halaman, supaya
-	   ivory terasa seperti stok kertas, bukan warna layar yang datar */
+	/* a very fine paper grain over the whole page, so the ivory
+	   feels like paper stock and not a flat screen colour */
 	body::after {
 		content: '';
 		position: fixed;
@@ -68,7 +68,7 @@
 		text-align: inherit;
 	}
 
-	/* kursor bawaan disembunyikan hanya ketika kursor kustom aktif */
+	/* the native cursor is hidden only while the custom cursor is active */
 	@media (pointer: fine) {
 		html.has-custom-cursor,
 		html.has-custom-cursor * {
@@ -97,7 +97,7 @@
 	font-family: var(--font-display);
 }
 
-/* Huruf kapital kecil berjarak — dipakai untuk label & plakat museum */
+/* Spaced small capitals, used for labels and museum plaques */
 @utility label-caps {
 	font-family: var(--font-sans);
 	font-size: 0.625rem;
@@ -107,8 +107,8 @@
 }
 
 /* ---------------------------------------------------------------
-   Sapuan stabilo per baris (dipicu oleh action `marker`).
-   Ditulis global karena span barisnya dibuat lewat JavaScript.
+   Highlighter sweep per line (triggered by the `marker` action).
+   Written globally because the line spans are created in JavaScript.
    --------------------------------------------------------------- */
 .mark-line {
 	background-image: linear-gradient(
@@ -118,12 +118,12 @@
 	);
 	background-repeat: no-repeat;
 	background-size: 0% 100%;
-	/* sedikit meluber seperti tinta stabilo, tanpa menggeser tata letak */
+	/* bleeds a little like highlighter ink, without shifting the layout */
 	padding: 0.16em 0.16em;
 	margin: 0 -0.16em;
 	box-decoration-break: clone;
 	-webkit-box-decoration-break: clone;
-	/* lajunya sengaja tenang, seperti tangan yang menarik spidol */
+	/* the pace is deliberately calm, like a hand pulling a marker */
 	transition: background-size 1.6s cubic-bezier(0.42, 0.06, 0.2, 1) var(--mark-delay, 0ms);
 }
 .is-lit .mark-line {
@@ -131,7 +131,7 @@
 }
 
 /* ---------------------------------------------------------------
-   Animasi masuk (dipicu oleh action `reveal`)
+   Entrance animations (triggered by the `reveal` action)
    --------------------------------------------------------------- */
 .reveal {
 	opacity: 0;
@@ -149,7 +149,7 @@
 	filter: blur(0);
 }
 
-/* Baris teks yang tersingkap dari balik tirai */
+/* Lines of text revealed from behind a curtain */
 .line-mask {
 	display: block;
 	overflow: hidden;
@@ -165,7 +165,7 @@
 	transform: translateY(0);
 }
 
-/* Garis tipis yang memanjang */
+/* A thin rule that grows */
 .rule-grow {
 	transform: scaleX(0);
 	transform-origin: left;

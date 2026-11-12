@@ -3,8 +3,8 @@ import { onFrame, onResize, type FrameState } from '$lib/scroll.svelte';
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 /**
- * Menggeser elemen lebih lambat atau lebih cepat dari gulir halaman.
- * `speed` positif berarti elemen tertinggal di belakang.
+ * Moves an element slower or faster than the page scroll.
+ * A positive `speed` means the element lags behind.
  */
 export function parallax(node: HTMLElement, options: { speed?: number; rotate?: number } = {}) {
 	let speed = options.speed ?? 80;
@@ -52,8 +52,8 @@ export function parallax(node: HTMLElement, options: { speed?: number; rotate?: 
 }
 
 /**
- * Efek panel. Saat sebuah bagian mulai keluar ke atas layar, ia menyusut
- * sedikit dan meredup, sehingga bagian berikutnya terasa naik menimpanya.
+ * Panel effect. As a section starts to leave through the top of the screen it
+ * shrinks and dims a little, so the next section feels like it rises over it.
  */
 export function panel(node: HTMLElement, options: { depth?: number; fade?: number } = {}) {
 	const depth = options.depth ?? 0.06;
@@ -64,8 +64,8 @@ export function panel(node: HTMLElement, options: { depth?: number; fade?: numbe
 	const stop = onFrame((state) => {
 		const rect = node.getBoundingClientRect();
 		if (rect.bottom < -200 || rect.top > state.viewportH + 200) return;
-		// mulai menyusut hanya ketika bagian ini benar benar sedang pamit,
-		// yaitu saat sisi bawahnya naik melewati layar
+		// start shrinking only when this section is really leaving,
+		// that is, when its bottom edge moves up past the screen
 		const exit = clamp(1 - rect.bottom / Math.max(state.viewportH, 1), 0, 1);
 		const scale = 1 - exit * depth;
 		node.style.transform = `scale(${scale.toFixed(4)})`;
@@ -77,7 +77,7 @@ export function panel(node: HTMLElement, options: { depth?: number; fade?: numbe
 }
 
 /**
- * Sedikit condong mengikuti kecepatan gulir supaya benda terasa punya bobot.
+ * Leans slightly with the scroll velocity so the element feels like it has weight.
  */
 export function sway(node: HTMLElement, options: { amount?: number; max?: number } = {}) {
 	const amount = options.amount ?? 0.05;
@@ -92,7 +92,7 @@ export function sway(node: HTMLElement, options: { amount?: number; max?: number
 	return { destroy: stop };
 }
 
-/** Tombol yang sedikit tertarik ke arah kursor. */
+/** A button that is pulled slightly towards the cursor. */
 export function magnetic(node: HTMLElement, strength = 0.28) {
 	let raf = 0;
 	let x = 0;

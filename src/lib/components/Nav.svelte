@@ -1,14 +1,19 @@
 <script lang="ts">
-	import { profile, sections } from '$lib/data';
+	import { profile } from '$lib/data';
+	import { i18n, locales } from '$lib/i18n/index.svelte';
 	import { glideTo, glideToId, motion, onFrame } from '$lib/scroll.svelte';
 	import { ui } from '$lib/ui.svelte';
 	import { magnetic } from '$lib/actions/motion';
 
-	// tombol ajakan sudah menuju bagian kontak, jadi tautannya tidak
-	// perlu diulang di deretan tengah
-	const links = sections.filter((section) => section.id !== 'atas' && section.id !== 'kontak');
-	const sheetLinks = sections.filter((section) => section.id !== 'atas');
-	const atContact = $derived(sections[ui.active]?.id === 'kontak');
+	// the call-to-action button already goes to the contact section, so the
+	// link is not repeated in the middle row
+	const sections = $derived(i18n.t.sections);
+	const t = $derived(i18n.t.ui.nav);
+	const links = $derived(
+		sections.filter((section) => section.id !== 'home' && section.id !== 'contact')
+	);
+	const sheetLinks = $derived(sections.filter((section) => section.id !== 'home'));
+	const atContact = $derived(sections[ui.active]?.id === 'contact');
 
 	let compact = $state(false);
 	let open = $state(false);
@@ -20,14 +25,16 @@
 	let markW = $state(0);
 	let markOn = $state(false);
 
-	// tautan mana yang sedang disorot atau sedang dibaca
+	// which link is hovered or currently being read
 	const spot = $derived(
 		hover !== null ? hover : links.findIndex((link) => link.id === sections[ui.active]?.id)
 	);
 
-	// penanda meluncur ke tautan yang sedang disorot
+	// the marker slides to the highlighted link
 	$effect(() => {
 		const el = items[spot];
+		// the labels change width with the language, so measure again then
+		void i18n.locale;
 		if (!list || !el) {
 			markOn = false;
 			return;
@@ -52,7 +59,7 @@
 
 <header class:compact class:open class:dark={ui.dark}>
 	<div class="shell">
-		<button type="button" class="mark" onclick={() => glideTo(0)} aria-label="Back to top">
+		<button type="button" class="mark" onclick={() => glideTo(0)} aria-label={t.top}>
 			<span class="mono font-display" style:--progress="{motion.progress * 100}%">
 				{profile.initials}
 			</span>
@@ -81,28 +88,45 @@
 			{/each}
 		</nav>
 
-		<button
-			type="button"
-			class="cta"
-			class:on={atContact}
-			use:magnetic={0.2}
-			onclick={() => go('kontak')}
-			data-cursor="Hello"
-		>
-			<span>Get in Touch</span>
-			<span class="pip"></span>
-		</button>
+		<div class="end">
+			<!-- the language changes in place and the choice is remembered -->
+			<div class="lang" class:second={i18n.locale === 'id'} role="group" aria-label={t.language}>
+				{#each locales as locale (locale.code)}
+					<button
+						type="button"
+						lang={locale.code}
+						aria-label={locale.name}
+						aria-pressed={i18n.locale === locale.code}
+						onclick={() => i18n.set(locale.code)}
+					>
+						{locale.label}
+					</button>
+				{/each}
+			</div>
 
-		<button
-			type="button"
-			class="burger"
-			onclick={() => (open = !open)}
-			aria-expanded={open}
-			aria-label={open ? 'Close menu' : 'Open menu'}
-		>
-			<span></span>
-			<span></span>
-		</button>
+			<button
+				type="button"
+				class="cta"
+				class:on={atContact}
+				use:magnetic={0.2}
+				onclick={() => go('contact')}
+				data-cursor
+			>
+				<span>{t.cta}</span>
+				<span class="pip"></span>
+			</button>
+
+			<button
+				type="button"
+				class="burger"
+				onclick={() => (open = !open)}
+				aria-expanded={open}
+				aria-label={open ? t.closeMenu : t.openMenu}
+			>
+				<span></span>
+				<span></span>
+			</button>
+		</div>
 	</div>
 
 	<div class="sheet">
@@ -136,17 +160,17 @@
 		color: var(--color-ivory);
 	}
 
-	/* satu bilah mengambang yang menyusut begitu halaman bergulir */
-	/* tiga kolom dengan sisi kiri dan kanan selebar sama, jadi deretan
-	   tautan di tengah tidak tergeser oleh lebar monogram */
+	/* one floating bar that shrinks once the page scrolls */
+	/* three columns with equal left and right sides, so the row of links
+	   in the middle is not shifted by the width of the monogram */
 	.shell {
 		position: relative;
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
 		align-items: center;
 		gap: 0.75rem;
-		/* kiri dan kanan harus sama persis, kalau tidak deretan tautan
-		   di tengah ikut tergeser */
+		/* left and right must match exactly, or the row of links in the
+		   middle shifts */
 		padding: 0.5rem;
 		border-radius: 999px;
 		border: 1px solid transparent;
@@ -168,7 +192,7 @@
 		border-color: color-mix(in srgb, var(--color-gold) 22%, transparent);
 	}
 
-	/* --- wordmark yang terisi mengikuti posisi gulir --- */
+	/* --- wordmark that fills with the scroll position --- */
 	.mark {
 		display: inline-flex;
 		align-items: center;
@@ -198,7 +222,7 @@
 		--progress-color: var(--color-gold);
 	}
 
-	/* --- tautan dengan penanda yang meluncur --- */
+	/* --- links with a sliding marker --- */
 	.links {
 		position: relative;
 		display: none;
@@ -246,12 +270,60 @@
 		opacity: 1;
 	}
 
-	/* --- ajakan --- */
-	.cta {
-		display: none;
+	.end {
+		display: flex;
 		align-items: center;
 		justify-self: end;
 		grid-column: 3;
+		gap: 0.5rem;
+	}
+
+	/* --- language switch: two letters and a marker that slides between them --- */
+	.lang {
+		position: relative;
+		display: grid;
+		grid-template-columns: repeat(2, 2.35rem);
+		border-radius: 999px;
+	}
+	.lang::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 50%;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-blush) 70%, transparent);
+		transition:
+			transform 0.75s var(--ease-silk),
+			background-color 0.7s var(--ease-silk);
+	}
+	.lang.second::before {
+		transform: translateX(100%);
+	}
+	header.dark .lang::before {
+		background: color-mix(in srgb, var(--color-gold) 26%, transparent);
+	}
+	.lang button {
+		position: relative;
+		padding: 0.7rem 0;
+		font-size: 0.63rem;
+		letter-spacing: 0.2em;
+		text-align: center;
+		/* the tracking adds space after the last letter, this evens it out */
+		text-indent: 0.2em;
+		opacity: 0.55;
+		transition: opacity 0.5s var(--ease-silk);
+	}
+	.lang button[aria-pressed='true'],
+	.lang button:hover {
+		opacity: 1;
+	}
+
+	/* --- call to action --- */
+	.cta {
+		display: none;
+		align-items: center;
 		gap: 0.7rem;
 		border-radius: 999px;
 		border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
@@ -281,7 +353,7 @@
 	header.dark .pip {
 		background: var(--color-gold);
 	}
-	/* menyala saat pembaca memang sedang berada di bagian kontak */
+	/* lit when the reader is actually in the contact section */
 	.cta.on {
 		border-color: color-mix(in srgb, currentColor 60%, transparent);
 		background: color-mix(in srgb, var(--color-blush) 55%, transparent);
@@ -303,11 +375,9 @@
 		transform: scale(1.6);
 	}
 
-	/* --- menu layar kecil --- */
+	/* --- small-screen menu --- */
 	.burger {
 		display: grid;
-		grid-column: 3;
-		justify-self: end;
 		gap: 5px;
 		padding: 0.9rem 0.8rem;
 	}

@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { fade, fly, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import { gallery } from '$lib/data';
+	import { i18n } from '$lib/i18n/index.svelte';
 	import { viewer, closeViewer } from '$lib/viewer.svelte';
 	import { lockScroll } from '$lib/scroll.svelte';
 
+	const gallery = $derived(i18n.t.gallery);
+	const t = $derived(i18n.t.ui.viewer);
 	const item = $derived(gallery[viewer.index]);
 
 	let frame = $state<HTMLIFrameElement | null>(null);
 
 	/**
-	 * Halaman sematan Instagram mengabarkan tinggi aslinya lewat postMessage,
-	 * cara yang sama dipakai skrip resmi mereka. Hasil ukurannya disimpan per
-	 * reel supaya bingkai tidak melompat ketika unggahan itu dibuka lagi.
+	 * The Instagram embed page reports its real height through postMessage, the
+	 * same way their official script does. The measurement is stored per reel
+	 * so the frame does not jump when that post is opened again.
 	 */
 	let heights = $state<Record<string, number>>({});
 	const frameHeight = $derived(heights[item.code] ?? 0);
@@ -24,7 +26,7 @@
 			const measured = Number(data?.details?.height);
 			if (data?.type === 'MEASURE' && measured > 0) heights[item.code] = Math.round(measured);
 		} catch {
-			// pesan dari sumber lain, bukan urusan kita
+			// a message from another source, not ours to handle
 		}
 	}
 
@@ -52,12 +54,12 @@
 <svelte:window on:keydown={onKey} on:message={onMessage} />
 
 {#if viewer.open}
-	<div class="viewer" role="dialog" aria-modal="true" aria-label="Instagram reel player">
+	<div class="viewer" role="dialog" aria-modal="true" aria-label={t.label}>
 		<button
 			class="backdrop"
 			transition:fade={{ duration: 400 }}
 			onclick={closeViewer}
-			aria-label="Close player"
+			aria-label={t.closePlayer}
 		></button>
 
 		<span class="beam" transition:fade={{ duration: 800 }} aria-hidden="true"></span>
@@ -68,7 +70,7 @@
 					<iframe
 						bind:this={frame}
 						class="reel"
-						title="Instagram reel: {item.title}"
+						title={t.frame(item.title)}
 						src="https://www.instagram.com/reel/{item.code}/embed/"
 						style:height={frameHeight ? `${frameHeight}px` : null}
 						allow="encrypted-media; picture-in-picture; clipboard-write"
@@ -78,12 +80,12 @@
 				</div>
 
 				<div class="note" in:fly={{ y: 26, duration: 750, delay: 120, easing: cubicOut }}>
-					<p class="gold label-caps">Work {item.no} · {item.date}</p>
+					<p class="gold label-caps">{t.work} {item.no} · {item.date}</p>
 					<h3 class="font-display">{item.title}</h3>
 					<p class="say">{item.note}</p>
 
 					<dl>
-						{#each [['Role', item.roles.join(', ')], ['Client', item.brand], ['Topic', item.topic], ['Account', item.account], ['Aired', item.date]] as [key, value] (key)}
+						{#each [[t.role, item.roles.join(', ')], [t.client, item.brand], [t.topic, item.topic], [t.account, item.account], [t.aired, item.date]] as [key, value], i (i)}
 							<div>
 								<dt class="label-caps">{key}</dt>
 								<dd class="font-display">{value}</dd>
@@ -97,28 +99,28 @@
 						target="_blank"
 						rel="noreferrer noopener"
 					>
-						Open on Instagram
+						{i18n.t.ui.work.instagram}
 					</a>
 				</div>
 			{/key}
 		</div>
 
-		<button class="ctrl close" onclick={closeViewer} transition:fade aria-label="Close">
+		<button class="ctrl close" onclick={closeViewer} transition:fade aria-label={t.close}>
 			<span></span><span></span>
 		</button>
-		<button class="ctrl left" onclick={prev} transition:fade aria-label="Previous reel"
+		<button class="ctrl left" onclick={prev} transition:fade aria-label={t.previous}
 			><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg></button
 		>
-		<button class="ctrl right" onclick={next} transition:fade aria-label="Next reel"
+		<button class="ctrl right" onclick={next} transition:fade aria-label={t.next}
 			><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg></button
 		>
 
-		<p class="tally label-caps" transition:fade>{viewer.index + 1} of {gallery.length}</p>
+		<p class="tally label-caps" transition:fade>{t.tally(viewer.index + 1, gallery.length)}</p>
 	</div>
 {/if}
 
 <style>
-	/* lebar pemutar, sengaja di atas lebar minimum sematan Instagram */
+	/* player width, deliberately above the minimum width of the Instagram embed */
 	.viewer {
 		--reel-w: 21rem;
 		position: fixed;
@@ -147,7 +149,7 @@
 		pointer-events: none;
 	}
 
-	/* isi dipusatkan selama masih muat, dan baru boleh digulir kalau tidak */
+	/* the content is centred while it fits, and only scrolls when it does not */
 	.body {
 		position: relative;
 		z-index: 2;
@@ -180,9 +182,9 @@
 	.reel {
 		width: 100%;
 		max-width: var(--reel-w);
-		/* Tinggi cadangan sebelum sematan mengabarkan ukuran aslinya.
-		   Instagram memasang videonya dalam kotak 4 : 5 lalu menambah
-		   kepala dan kaki setinggi tiga belas rem. */
+		/* Fallback height before the embed reports its real size.
+		   Instagram places the video in a 4 : 5 box and then adds a
+		   header and footer thirteen rem tall. */
 		height: calc(var(--reel-w) * 1.25 + 13rem);
 		border: 0;
 		background: #fff;
@@ -291,8 +293,8 @@
 		transform: rotate(-45deg);
 	}
 
-	/* di layar sempit tombol pindah turun ke bawah supaya tidak menutupi
-	   pemutar yang sudah memakai hampir seluruh lebar layar */
+	/* on narrow screens the buttons move to the bottom so they do not cover
+	   the player, which already uses almost the full width */
 	.left {
 		left: 1rem;
 		bottom: 1.1rem;
@@ -316,7 +318,7 @@
 		}
 	}
 
-	/* di layar sempit isi digulir melewati tombol, jadi dasarnya diredupkan */
+	/* on narrow screens the content scrolls past the buttons, so their base is dimmed */
 	.viewer::after {
 		content: '';
 		position: fixed;

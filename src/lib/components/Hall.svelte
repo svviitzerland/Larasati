@@ -1,21 +1,24 @@
 <script lang="ts">
-	import { gallery, type Craft } from '$lib/data';
+	import { type Craft } from '$lib/data';
+	import { i18n } from '$lib/i18n/index.svelte';
 	import { reveal } from '$lib/actions/reveal';
 	import { onFrame } from '$lib/scroll.svelte';
 	import { openViewer } from '$lib/viewer.svelte';
 
-	const [latest, ...rest] = gallery;
-	const restCount = String(rest.length).padStart(2, '0');
+	const t = $derived(i18n.t.ui.work);
+	const latest = $derived(i18n.t.gallery[0]);
+	const rest = $derived(i18n.t.gallery.slice(1));
+	const restCount = $derived(String(rest.length).padStart(2, '0'));
 
 	let section = $state<HTMLElement | null>(null);
 	let cover = $state<HTMLElement | null>(null);
-	let rail = $state<HTMLUListElement | null>(null);
+	let wall = $state<HTMLUListElement | null>(null);
 
-	// cahaya ruangan yang mengikuti kursor
+	// room light that follows the cursor
 	let lightX = $state(50);
 	let lightY = $state(35);
 
-	// nama pendek untuk lencana di sudut sampul, ruangnya sempit
+	// short names for the badge in the corner of a cover, where space is tight
 	const short: Record<Craft, string> = {
 		'Master of Ceremony': 'MC',
 		'Voice Over': 'VO',
@@ -24,9 +27,9 @@
 	const badge = (roles: Craft[]) => roles.map((role) => short[role]).join(' · ');
 
 	/**
-	 * Satu momen gulir untuk karya terbaru. Sampulnya masuk sebagai lengkung
-	 * kecil, senada dengan potret di beranda, lalu membuka menjadi bingkai
-	 * reel utuh ketika sampai di tengah layar.
+	 * One scroll moment for the latest piece. The cover enters as a small arch,
+	 * echoing the arch in the hero, then opens into a full reel frame when it
+	 * reaches the middle of the screen.
 	 */
 	$effect(() => {
 		if (!cover) return;
@@ -48,16 +51,34 @@
 		lightY = ((event.clientY - rect.top) / rect.height) * 100;
 	}
 
-	function scrollRail(direction: -1 | 1) {
-		if (!rail) return;
-		rail.scrollBy({ left: direction * rail.clientWidth * 0.72, behavior: 'smooth' });
-	}
+	/**
+	 * Reel wall. One scroll value is written to `--drift`, and each column reads
+	 * it at a different rate through CSS, so the columns pass one another
+	 * without measuring every cover.
+	 */
+	$effect(() => {
+		if (!wall) return;
+		const el = wall;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		return onFrame((state) => {
+			const rect = el.getBoundingClientRect();
+			if (rect.top > state.viewportH || rect.bottom < 0) return;
+			const seen = (state.viewportH - rect.top) / (state.viewportH + rect.height);
+			el.style.setProperty('--drift', (Math.min(Math.max(seen, 0), 1) - 0.5).toFixed(4));
+		});
+	});
 </script>
 
-<!-- Tautan Instagram memang menuju ke luar situs. -->
+<!-- The Instagram links leave the site on purpose. -->
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
-<section id="galeri" bind:this={section} class="hall" onpointermove={trackLight} aria-label="Work">
-	<!-- gerbang lengkung: terang di luar, gelap di dalam, tanpa garis batas mendatar -->
+<section
+	id="work"
+	bind:this={section}
+	class="hall"
+	onpointermove={trackLight}
+	aria-label={i18n.t.sections[2].label}
+>
+	<!-- arched gateway: light outside, dark inside, with no flat dividing line -->
 	<div class="portal in" aria-hidden="true">
 		<span class="ring"></span>
 		<span class="arch"></span>
@@ -77,25 +98,28 @@
 	<div class="inner">
 		<header class="head">
 			<h2 class="work-heading reveal font-display" use:reveal={{ y: '12px', blur: 0 }}>
-				<span>Recent</span><span class="work-italic">work.</span>
+				<span>{t.heading[0]}</span><span class="work-italic">{t.heading[1]}</span>
 			</h2>
 		</header>
 
-		<!-- karya terbaru tampil paling besar -->
+		<!-- the latest piece is shown largest -->
 		<article class="feature">
-			<button
-				bind:this={cover}
-				type="button"
-				class="feature-cover"
-				onclick={() => openViewer(0)}
-				data-cursor="Play"
-				aria-label="Play {latest.title} for {latest.brand}"
-			>
-				<img src={latest.cover} alt="Cover of the {latest.title} reel" />
-				<span class="shade" aria-hidden="true"></span>
-				<span class="fresh">Latest</span>
-				<span class="play big" aria-hidden="true"></span>
-			</button>
+			<div bind:this={cover} class="feature-frame">
+				<!-- the cover colours glow onto the wall behind it -->
+				<span class="aura" style:background-image="url({latest.cover})" aria-hidden="true"></span>
+				<button
+					type="button"
+					class="feature-cover"
+					onclick={() => openViewer(0)}
+					data-cursor
+					aria-label={t.play(latest.title, latest.brand)}
+				>
+					<img src={latest.cover} alt={t.cover(latest.title)} />
+					<span class="shade" aria-hidden="true"></span>
+					<span class="fresh">{t.latest}</span>
+					<span class="play big" aria-hidden="true"></span>
+				</button>
+			</div>
 
 			<div class="feature-info">
 				<h3 class="feature-title reveal font-display" use:reveal={{ delay: 80 }}>
@@ -113,7 +137,7 @@
 				<div class="actions reveal" use:reveal={{ delay: 320 }}>
 					<button type="button" class="watch" onclick={() => openViewer(0)}>
 						<span class="play small" aria-hidden="true"></span>
-						Play reel
+						{t.playReel}
 					</button>
 					<a
 						class="out"
@@ -121,53 +145,36 @@
 						target="_blank"
 						rel="noreferrer noopener"
 					>
-						Open on Instagram
+						{t.instagram}
 					</a>
 				</div>
 			</div>
 		</article>
 
-		<!-- sisanya berderet, tetap dengan nama brand dan perannya -->
+		<!-- the rest follow, still with their brand name and role -->
 		<div class="more">
 			<div class="more-head">
-				<p class="more-title reveal font-display" use:reveal={{ y: '12px', blur: 0 }}>More reels</p>
-				<div class="more-controls">
-					<p class="more-hint reveal" use:reveal={{ y: '12px', blur: 0 }}>
-						{restCount} reels
-					</p>
-					<div class="rail-controls" role="group" aria-label="Browse reels">
-						<button
-							type="button"
-							class="rail-arrow"
-							aria-label="Previous reels"
-							onclick={() => scrollRail(-1)}
-						>
-							<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.5-5 5.5 5 5.5" /></svg>
-						</button>
-						<button
-							type="button"
-							class="rail-arrow"
-							aria-label="Next reels"
-							onclick={() => scrollRail(1)}
-						>
-							<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 4.5 5 5.5-5 5.5" /></svg>
-						</button>
-					</div>
-				</div>
+				<p class="more-title reveal font-display" use:reveal={{ y: '12px', blur: 0 }}>
+					{t.more}
+				</p>
+				<p class="more-hint reveal" use:reveal={{ y: '12px', blur: 0 }}>
+					{t.count(restCount)}
+				</p>
 			</div>
-			<ul bind:this={rail} class="grid" aria-label="More reels">
+			<ul bind:this={wall} class="wall" aria-label={t.more}>
 				{#each rest as item, i (item.id)}
 					<li>
 						<button
 							type="button"
 							class="tile reveal"
-							use:reveal={{ delay: (i % 3) * 110, y: '40px' }}
+							use:reveal={{ delay: (i % 4) * 90, y: '48px', threshold: 0.08 }}
 							onclick={() => openViewer(i + 1)}
-							data-cursor="Play"
-							aria-label="Play {item.title} for {item.brand}, {item.roles.join(' and ')}"
+							data-cursor
+							aria-label={t.playAs(item.title, item.brand, item.roles)}
 						>
 							<span class="crop">
-								<img src={item.cover} alt="Cover of the {item.title} reel" loading="lazy" />
+								<img src={item.cover} alt={t.cover(item.title)} loading="lazy" />
+								<span class="veil" aria-hidden="true"></span>
 								<span class="tag" aria-hidden="true">{badge(item.roles)}</span>
 								<span class="play" aria-hidden="true"></span>
 							</span>
@@ -194,7 +201,7 @@
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
-		/* suasana dipudarkan di kedua ujung supaya tidak ada tepi saat warna berganti */
+		/* the atmosphere fades at both ends so no edge shows where the colour changes */
 		mask-image: linear-gradient(
 			to bottom,
 			transparent 0,
@@ -214,7 +221,7 @@
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 	}
 
-	/* --- gerbang masuk dan keluar --- */
+	/* --- entry and exit gateways --- */
 	.portal {
 		position: absolute;
 		inset-inline: 0;
@@ -230,7 +237,7 @@
 		bottom: 0;
 		background: var(--color-mist);
 	}
-	/* lengkungnya lebih lebar dari layar supaya bahunya keluar dari tepi */
+	/* the arch is wider than the screen so its shoulders run off the edges */
 	.arch {
 		position: absolute;
 		left: 50%;
@@ -308,7 +315,7 @@
 		font-style: italic;
 	}
 
-	/* --- karya terbaru --- */
+	/* --- latest piece --- */
 	.feature {
 		position: relative;
 		display: grid;
@@ -336,15 +343,37 @@
 		}
 	}
 
-	.feature-cover {
+	.feature-frame {
 		--open: 0;
 		position: relative;
-		display: block;
-		width: min(100%, 15rem);
-		aspect-ratio: 9 / 16;
+		isolation: isolate;
+		width: min(100%, 16rem);
 		margin-inline: auto;
+	}
+	/* a small copy of the cover, blurred, then scaled up. Much cheaper
+	   than blurring an image at full size. */
+	.aura {
+		position: absolute;
+		z-index: -1;
+		top: 50%;
+		left: 50%;
+		width: 6rem;
+		aspect-ratio: 9 / 16;
+		margin: -5.33rem 0 0 -3rem;
+		background-position: center;
+		background-size: cover;
+		filter: blur(14px) saturate(1.25);
+		opacity: calc(var(--open) * 0.3);
+		transform: scale(6.5);
+		pointer-events: none;
+	}
+	.feature-cover {
+		position: relative;
+		display: block;
+		width: 100%;
+		aspect-ratio: 9 / 16;
 		overflow: hidden;
-		/* lengkung atas mengecil sampai jadi sudut biasa saat terbuka penuh */
+		/* the top arch shrinks to a plain corner once fully open */
 		border-radius: calc((1 - var(--open)) * 11rem + 0.6rem) calc((1 - var(--open)) * 11rem + 0.6rem)
 			0.6rem 0.6rem;
 		transform: scale(calc(0.86 + var(--open) * 0.14));
@@ -353,17 +382,9 @@
 			0 50px 90px -40px rgba(0, 0, 0, 0.95),
 			0 0 0 1px color-mix(in srgb, var(--color-gold) 22%, transparent);
 	}
-	@media (min-width: 900px) {
-		.feature-cover {
-			width: min(100%, 17rem);
-			height: auto;
-			margin-inline: 0;
-		}
-	}
 	@media (prefers-reduced-motion: reduce) {
-		.feature-cover {
-			border-radius: 0.6rem;
-			transform: none;
+		.feature-frame {
+			--open: 1 !important;
 		}
 	}
 	.feature-cover img {
@@ -490,8 +511,8 @@
 		.feature {
 			--feature-inset: clamp(2.75rem, 5vw, 4rem);
 		}
-		.feature .feature-cover {
-			width: min(100%, 17rem);
+		.feature .feature-frame {
+			width: min(100%, 19rem);
 			margin-left: 0;
 			margin-right: var(--feature-inset);
 			justify-self: end;
@@ -515,7 +536,7 @@
 		}
 	}
 
-	/* --- tombol putar, digambar dengan CSS --- */
+	/* --- play button, drawn with CSS --- */
 	.play {
 		position: absolute;
 		top: 50%;
@@ -531,9 +552,10 @@
 		transition:
 			background-color 0.6s var(--ease-silk),
 			border-color 0.6s var(--ease-silk),
+			opacity 0.6s var(--ease-silk),
 			transform 0.6s var(--ease-silk);
 	}
-	/* segitiga putar digambar dengan clip-path */
+	/* the play triangle is drawn with clip-path */
 	.play::after {
 		content: '';
 		width: 0.62rem;
@@ -575,7 +597,7 @@
 		transform: scale(1.08);
 	}
 
-	/* --- deretan karya lainnya --- */
+	/* --- the other reels --- */
 	.more {
 		max-width: 1100px;
 		margin: 4.5rem auto 0;
@@ -598,86 +620,65 @@
 		text-transform: uppercase;
 		color: color-mix(in srgb, var(--color-ivory) 48%, transparent);
 	}
-	.more-controls,
-	.rail-controls {
-		display: flex;
-		align-items: center;
-	}
-	.more-controls {
-		gap: 1rem;
-	}
-	.rail-controls {
-		gap: 0.45rem;
-	}
-	.rail-arrow {
+	.wall {
+		--drift: 0;
 		display: grid;
-		width: 2.25rem;
-		height: 2.25rem;
-		place-items: center;
-		border: 1px solid color-mix(in srgb, var(--color-gold) 38%, transparent);
-		border-radius: 50%;
-		color: color-mix(in srgb, var(--color-ivory) 78%, transparent);
-		transition:
-			background-color 0.35s var(--ease-silk),
-			border-color 0.35s var(--ease-silk),
-			color 0.35s var(--ease-silk),
-			transform 0.35s var(--ease-silk);
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 2.4rem 0.9rem;
+		margin-top: 1.8rem;
+		padding-bottom: 3.5rem;
 	}
-	.rail-arrow:hover {
-		transform: translateY(-1px);
-		border-color: var(--color-gold);
-		background: color-mix(in srgb, var(--color-gold) 16%, transparent);
-		color: var(--color-ivory);
-	}
-	.rail-arrow svg {
-		width: 1rem;
-		height: 1rem;
-		fill: none;
-		stroke: currentColor;
-		stroke-width: 1.2;
-		stroke-linecap: round;
-		stroke-linejoin: round;
-	}
-	.grid {
-		display: grid;
-		grid-auto-flow: column;
-		grid-auto-columns: min(55vw, 12.5rem);
-		grid-template-rows: minmax(0, 1fr);
-		gap: 1rem;
-		margin-top: 1.5rem;
-		padding-bottom: 1.2rem;
-		overflow-x: auto;
-		overflow-y: hidden;
-		overscroll-behavior-inline: contain;
-		scroll-snap-type: x mandatory;
-		scroll-padding-inline: 0.25rem;
-		scrollbar-color: color-mix(in srgb, var(--color-gold) 55%, transparent) transparent;
-		scrollbar-width: thin;
-	}
-	@media (min-width: 700px) {
-		.grid {
-			grid-auto-columns: clamp(10.5rem, 12.5vw, 12.5rem);
-			gap: 1.35rem;
-		}
-	}
-	@media (min-width: 1200px) {
-		.grid {
-			gap: 1.5rem;
-		}
-	}
-	.grid::-webkit-scrollbar {
-		height: 0.3rem;
-	}
-	.grid::-webkit-scrollbar-track {
-		background: color-mix(in srgb, var(--color-ivory) 10%, transparent);
-	}
-	.grid::-webkit-scrollbar-thumb {
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-gold) 55%, transparent);
-	}
-	.grid > li {
+	.wall > li {
 		min-width: 0;
-		scroll-snap-align: start;
+		transform: translate3d(0, calc(var(--lag, 0rem) + var(--drift) * var(--pull, 0px)), 0);
+		will-change: transform;
+	}
+	/* each column has its own starting point and rate */
+	@media (max-width: 699px) {
+		.wall > li:nth-child(2n) {
+			--lag: 2.75rem;
+			--pull: -44px;
+		}
+	}
+	@media (min-width: 700px) and (max-width: 1099px) {
+		.wall {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 2.8rem 1.35rem;
+			padding-bottom: 4.5rem;
+		}
+		.wall > li:nth-child(3n + 1) {
+			--pull: 36px;
+		}
+		.wall > li:nth-child(3n + 2) {
+			--lag: 3.75rem;
+			--pull: -72px;
+		}
+		.wall > li:nth-child(3n) {
+			--lag: 1.5rem;
+			--pull: -20px;
+		}
+	}
+	@media (min-width: 1100px) {
+		.wall {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			gap: 3.2rem 1.6rem;
+			padding-bottom: 7.5rem;
+		}
+		.wall > li:nth-child(4n + 1) {
+			--pull: 44px;
+		}
+		.wall > li:nth-child(4n + 2) {
+			--lag: 4.5rem;
+			--pull: -92px;
+		}
+		.wall > li:nth-child(4n + 3) {
+			--lag: 1.5rem;
+			--pull: 20px;
+		}
+		.wall > li:nth-child(4n) {
+			--lag: 6.75rem;
+			--pull: -64px;
+		}
 	}
 
 	.tile {
@@ -690,18 +691,37 @@
 		display: block;
 		aspect-ratio: 9 / 16;
 		overflow: hidden;
-		border-radius: 0.5rem;
+		border-radius: 0.6rem;
 		box-shadow:
 			0 30px 50px -30px rgba(0, 0, 0, 0.9),
 			0 0 0 1px rgba(255, 236, 204, 0.08);
-		transition: box-shadow 0.7s var(--ease-silk);
+		transition:
+			box-shadow 0.7s var(--ease-silk),
+			transform 0.9s var(--ease-silk);
+	}
+	.veil {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgba(20, 16, 15, 0.5), transparent 45%);
+		transition: opacity 0.9s var(--ease-silk);
+	}
+	.tile:hover .veil,
+	.tile:focus-visible .veil {
+		opacity: 0.4;
+	}
+	.tile .play {
+		opacity: 0.85;
+	}
+	.tile:hover .play,
+	.tile:focus-visible .play {
+		opacity: 1;
 	}
 	.crop img {
 		display: block;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		filter: saturate(0.82) brightness(0.9);
+		filter: saturate(0.88) brightness(0.92);
 		transition:
 			filter 0.9s var(--ease-silk),
 			transform 1.3s var(--ease-silk);
@@ -713,6 +733,7 @@
 	}
 	.tile:hover .crop,
 	.tile:focus-visible .crop {
+		transform: translateY(-6px);
 		box-shadow:
 			0 40px 60px -30px rgba(0, 0, 0, 1),
 			0 0 0 1px color-mix(in srgb, var(--color-gold) 60%, transparent);
@@ -740,7 +761,7 @@
 		display: -webkit-box;
 		margin-top: 0.35rem;
 		overflow: hidden;
-		font-size: 1.02rem;
+		font-size: clamp(1.02rem, 1.5vw, 1.22rem);
 		line-height: 1.3;
 		color: color-mix(in srgb, var(--color-ivory) 88%, transparent);
 		-webkit-box-orient: vertical;
